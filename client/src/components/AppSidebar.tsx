@@ -28,7 +28,7 @@ const items = [
     },
     {
         title: "Create APF",
-        url: "#",
+        url: "/create-apf",
         icon: PenLine,
     },
     {
