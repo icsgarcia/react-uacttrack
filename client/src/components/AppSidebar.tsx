@@ -1,5 +1,4 @@
-import { Files, Home, PenLine, Link, ChevronUp } from "lucide-react";
-
+import { Files, Home, PenLine, Link as link, ChevronUp } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
@@ -18,6 +17,8 @@ import {
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import useAuth from "@/hooks/useAuth";
+import { Link } from "react-router";
 
 const items = [
     {
@@ -38,11 +39,13 @@ const items = [
     {
         title: "External Links",
         url: "/external-links",
-        icon: Link,
+        icon: link,
     },
 ];
 
 export function AppSidebar() {
+    const { user, logout } = useAuth();
+
     return (
         <Sidebar>
             <SidebarHeader>
@@ -55,10 +58,10 @@ export function AppSidebar() {
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild>
-                                        <a href={item.url}>
+                                        <Link to={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>
-                                        </a>
+                                        </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
@@ -76,7 +79,7 @@ export function AppSidebar() {
                                         <AvatarImage src="https://github.com/shadcn.png" />
                                         <AvatarFallback>CN</AvatarFallback>
                                     </Avatar>
-                                    Ivan Garcia
+                                    {user?.firstName} {user?.lastName}
                                     <ChevronUp className="ml-auto" />
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
@@ -85,7 +88,7 @@ export function AppSidebar() {
                                 className="w-[--radix-popper-anchor-width]"
                             >
                                 <DropdownMenuItem>
-                                    <span>Sign out</span>
+                                    <span onClick={logout}>Sign out</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
