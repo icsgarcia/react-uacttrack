@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DownloadableForms from "./pages/DownloadableForms";
 import ExternalLinks from "./pages/ExternalLinks";
+import CreateAPF from "./pages/CreateAPF";
 
 function App() {
     return (
@@ -21,6 +22,7 @@ function App() {
                             path="/downloadable-forms"
                             element={<DownloadableForms />}
                         />
+                        <Route path="/create-apf" element={<CreateAPF />} />
                         <Route
                             path="/external-links"
                             element={<ExternalLinks />}
