@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt, { Secret, SignOptions } from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import { PrismaClient } from "../../generated/prisma";
 import config from "../config/config";
 import { AuthRequest } from "../middlewares/authMiddleware";
