@@ -4,8 +4,19 @@ import jwt, { Secret } from "jsonwebtoken";
 import { PrismaClient } from "../../generated/prisma";
 import config from "../config/config";
 import { AuthRequest } from "../middlewares/authMiddleware";
+import s3Client from "../services/s3Service";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const prisma = new PrismaClient();
+
+const createPresignedUrlWithClient = ({ key }: { key: string }) => {
+    const command = new GetObjectCommand({
+        Bucket: config.aws_s3_bucket,
+        Key: key,
+    });
+    return getSignedUrl(s3Client, command, { expiresIn: 3600 });
+};
 
 const generateAccessToken = (userId: number) => {
     return jwt.sign({ userId }, config.access_token as Secret, {
@@ -20,7 +31,7 @@ const generateRefreshToken = (userId: number) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, organizationId, email, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -33,6 +44,7 @@ export const register = async (req: Request, res: Response) => {
             data: {
                 firstName,
                 lastName,
+                organizationId,
                 email,
                 password: hashedPassword,
             },
@@ -70,6 +82,18 @@ export const login = async (req: Request, res: Response) => {
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
+        const organization = await prisma.organization.findUnique({
+            where: { id: user.organizationId },
+            select: { id: true, name: true, logo: true },
+        });
+
+        // if (organization && organization.logo) {
+        //     logoUrl = `https://${config.aws_s3_bucket}.s3.${config.aws_region}.amazonaws.com/${organization.logo}`;
+        // }
+
+        const logoUrl = await createPresignedUrlWithClient({
+            key: organization?.logo || "",
+        });
 
         const accessToken = generateAccessToken(user.id);
         const refreshToken = generateRefreshToken(user.id);
@@ -89,7 +113,10 @@ export const login = async (req: Request, res: Response) => {
 
         res.status(200).json({
             message: "Login successful",
-            user: userWithoutPassword,
+            user: {
+                ...userWithoutPassword,
+                organization: { ...organization, logoUrl },
+            },
             accessToken,
             refreshToken,
         });

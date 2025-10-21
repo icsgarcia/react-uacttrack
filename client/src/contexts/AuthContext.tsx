@@ -5,6 +5,12 @@ export interface User {
     firstName: string;
     lastName: string;
     email: string;
+    organization: {
+        id: number;
+        name: string;
+        logo: string;
+        logoUrl: string;
+    };
 }
 
 interface AuthContextType {

@@ -1,6 +1,14 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import useAuth from "@/hooks/useAuth";
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+} from "@/components/ui/input-group";
 import { useNavigate } from "react-router";
+import { Lock, Mail } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 function Login() {
     const { login } = useAuth();
@@ -42,38 +50,49 @@ function Login() {
                         Login
                     </h1>
                     <div className="mb-4">
-                        <label
+                        <Label
                             htmlFor="email"
                             className="block mb-1 text-white"
                         >
                             Email
-                        </label>
-                        <input
-                            type="text"
-                            id="email"
-                            name="email"
-                            onChange={handleChange}
-                            className="border p-2 w-full text-white"
-                        />
+                        </Label>
+                        <InputGroup>
+                            <InputGroupInput
+                                type="text"
+                                id="email"
+                                name="email"
+                                onChange={handleChange}
+                                className="text-white"
+                            />
+                            <InputGroupAddon>
+                                <Mail className="text-white" />
+                            </InputGroupAddon>
+                        </InputGroup>
                     </div>
                     <div className="mb-4">
-                        <label
+                        <Label
                             htmlFor="password"
                             className="block mb-1 text-white"
                         >
                             Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            onChange={handleChange}
-                            className="border p-2 w-full text-white"
-                        />
+                        </Label>
+
+                        <InputGroup className="text-white">
+                            <InputGroupInput
+                                type="password"
+                                id="password"
+                                name="password"
+                                onChange={handleChange}
+                                className="text-white"
+                            />
+                            <InputGroupAddon>
+                                <Lock className="text-white" />
+                            </InputGroupAddon>
+                        </InputGroup>
                     </div>
-                    <button className="mb-4 border rounded p-2 w-full text-white">
+                    <Button className="mb-4 border rounded p-2 w-full bg-blue-800 text-white">
                         Login
-                    </button>
+                    </Button>
                     <div>
                         <p className="text-sm text-white text-center">
                             Don't have an account?{" "}
