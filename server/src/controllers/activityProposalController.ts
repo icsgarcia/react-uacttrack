@@ -4,8 +4,6 @@ import config from "../config/config";
 import s3Client from "../services/s3Service";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { AuthRequest } from "../middlewares/authMiddleware";
-import multer from "multer";
-import { parse } from "path";
 
 const prisma = new PrismaClient();
 
@@ -39,6 +37,7 @@ export const createActivityProposal = async (
         participants,
         purpose,
         requirements,
+        organizationId,
     } = req.body;
 
     const files = req.files as
@@ -87,6 +86,7 @@ export const createActivityProposal = async (
                 purpose,
                 requirements,
                 userId: Number(req.user?.userId),
+                organizationId: Number(organizationId),
             },
         });
         res.status(201).json({
