@@ -7,6 +7,9 @@ import Register from "./pages/Register";
 import DownloadableForms from "./pages/DownloadableForms";
 import ExternalLinks from "./pages/ExternalLinks";
 import CreateAPF from "./pages/CreateAPF";
+import SubmittedAPF from "./pages/SubmittedAPF";
+import ApprovedAPF from "./pages/ApprovedAPF";
+import RejectedAPF from "./pages/RejectedAPF";
 
 function App() {
     return (
@@ -24,9 +27,16 @@ function App() {
                         />
                         <Route path="/create-apf" element={<CreateAPF />} />
                         <Route
+                            path="/submitted-apf"
+                            element={<SubmittedAPF />}
+                        />
+                        <Route
                             path="/external-links"
                             element={<ExternalLinks />}
                         />
+                        <Route path="/approved-apf" element={<ApprovedAPF />} />
+
+                        <Route path="/rejected-apf" element={<RejectedAPF />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
