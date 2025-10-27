@@ -6,9 +6,9 @@ import axios, {
 
 const api: AxiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
-    headers: {
-        "Content-Type": "application/json",
-    },
+    // headers: {
+    //     "Content-Type": "application/json",
+    // },
     timeout: 5000,
 });
 

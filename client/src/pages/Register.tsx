@@ -39,7 +39,7 @@ function Register() {
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
-                const response = await api.get("/org");
+                const response = await api.get("/organization");
                 setOrganizations(response.data);
             } catch (error) {
                 console.error("Error fetching organizations:", error);
