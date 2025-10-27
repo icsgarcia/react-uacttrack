@@ -18,41 +18,59 @@ import {
 } from "@/components/ui/select";
 import Layout from "@/layouts/Layout";
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import api from "@/api/axios";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import useAuth from "@/hooks/useAuth";
+import { uploadFilesAndCreateAPF } from "@/utils/s3Upload";
 
 interface FormData {
-    cashForm?: File | null;
-    foodForm?: File | null;
-    supplyForm?: File | null;
-    reproductionForm?: File | null;
-    otherForm?: File | null;
+    cashForm: File | null;
+    foodForm: File | null;
+    supplyForm: File | null;
+    reproductionForm: File | null;
+    otherForm: File | null;
     attendees: number;
     date: string;
     startTime: string;
     endTime: string;
-    venue: string;
+    venueId: string;
     title: string;
     participants: string;
     purpose: string;
     requirements: string;
+    organizationId: number;
+}
+
+interface Venue {
+    id: number;
+    name: string;
+    capacity: number;
 }
 
 const optionalForms = [
     {
         title: "Check Payment / Cash",
+        name: "cashForm",
         description:
             "Funding Request Form (FRF) for P1,000 and above. Petty Cash Form (PCF) for aggregate amount below P1,000.",
     },
-    { title: "Food", description: "Request for Meals (RFM)" },
+    { title: "Food", name: "foodForm", description: "Request for Meals (RFM)" },
     {
         title: "Supplies",
+        name: "supplyForm",
         description:
             "Requisition Form (RF) for supplies available at RMS. Purchase Requisition (PR) for supplies to be purchased.",
     },
-    { title: "Reproduction", description: "Reproduction Form" },
-    { title: "Others", description: "" },
+    {
+        title: "Reproduction",
+        name: "reproductionForm",
+        description: "Reproduction Form",
+    },
+    { title: "Others", name: "otherForm", description: "" },
 ];
 
 function CreateAPF() {
+    const { user } = useAuth();
     const [formData, setFormData] = useState<FormData>({
         cashForm: null,
         foodForm: null,
@@ -63,12 +81,46 @@ function CreateAPF() {
         date: "",
         startTime: "",
         endTime: "",
-        venue: "",
+        venueId: "",
         title: "",
         participants: "",
         purpose: "",
         requirements: "",
+        organizationId: user!.organization.id,
     });
+
+    const fetchVenues = async (): Promise<Venue[]> => {
+        try {
+            const response = await api.get("/venues");
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching venues:", error);
+            return [];
+        }
+    };
+    const { data: venues } = useQuery<Venue[]>({
+        queryKey: ["venues"],
+        queryFn: fetchVenues,
+    });
+    const mutation = useMutation({
+        mutationFn: () => uploadFilesAndCreateAPF(formData),
+        onSuccess: () => {
+            alert("Activity Proposal Form created successfully!");
+        },
+        onError: () => {
+            alert("Error creating Activity Proposal Form.");
+        },
+    });
+
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name } = e.target;
+        if (e.target.files && e.target.files[0]) {
+            setFormData((prev) => ({
+                ...prev,
+                [name]: e.target.files![0],
+            }));
+        }
+    };
 
     const handleChange = (
         e: ChangeEvent<
@@ -80,12 +132,12 @@ function CreateAPF() {
     };
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log(formData);
+        mutation.mutate();
     };
     return (
         <Layout>
             <div className="p-4">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} encType="multipart/form-data">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                         {optionalForms.map((form, index) => (
                             <Card key={index} className="mb-4">
@@ -98,8 +150,9 @@ function CreateAPF() {
                                 <CardContent>
                                     <Input
                                         type="file"
-                                        name={form.title}
+                                        name={form.name}
                                         id={form.title}
+                                        onChange={(e) => handleFileChange(e)}
                                     />
                                 </CardContent>
                             </Card>
@@ -163,17 +216,25 @@ function CreateAPF() {
                                 Venue
                             </Label>
                             <Select
-                                name="venue"
-                                value={formData.venue}
+                                name="venueId"
+                                value={formData.venueId}
                                 onValueChange={(value) =>
-                                    setFormData({ ...formData, venue: value })
+                                    setFormData({ ...formData, venueId: value })
                                 }
                             >
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Select a venue" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="light">Light</SelectItem>
+                                    {venues &&
+                                        venues.map((venue) => (
+                                            <SelectItem
+                                                key={venue.id}
+                                                value={String(venue.id)}
+                                            >
+                                                {venue.name}
+                                            </SelectItem>
+                                        ))}
                                 </SelectContent>
                             </Select>
                         </div>

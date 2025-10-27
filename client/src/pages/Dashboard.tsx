@@ -35,8 +35,8 @@ function Dashboard() {
                     Dashboard
                 </h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                    {cardData.map((card) => (
-                        <Link to={card.link}>
+                    {cardData.map((card, index) => (
+                        <Link key={index} to={card.link}>
                             <Card>
                                 <CardHeader className="text-center">
                                     <CardTitle>{card.title}</CardTitle>

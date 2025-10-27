@@ -8,8 +8,23 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/api/axios";
+
+interface SubmittedAPF {
+    id: number;
+    title: string;
+    updatedAt: string;
+}
 
 function SubmittedAPF() {
+    const { data: submittedAPFData } = useQuery({
+        queryKey: ["submittedAPF"],
+        queryFn: async () => {
+            const response = await api.get("/apf/");
+            return response.data as SubmittedAPF[];
+        },
+    });
     return (
         <Layout>
             <div className="p-4">
@@ -27,10 +42,27 @@ function SubmittedAPF() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Date</TableCell>
-                        </TableRow>
+                        {submittedAPFData && submittedAPFData.length > 0 ? (
+                            submittedAPFData.map((apf) => (
+                                <TableRow key={apf.id}>
+                                    <TableCell>{apf.title}</TableCell>
+                                    <TableCell>
+                                        {new Date(
+                                            apf.updatedAt
+                                        ).toLocaleDateString()}
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={2}
+                                    className="text-center text-gray-500"
+                                >
+                                    No activity proposals found
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </div>

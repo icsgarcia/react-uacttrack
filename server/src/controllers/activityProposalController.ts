@@ -1,101 +1,104 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { PrismaClient } from "../../generated/prisma";
-import config from "../config/config";
-import s3Client from "../services/s3Service";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { AuthRequest } from "../middlewares/authMiddleware";
 
 const prisma = new PrismaClient();
-
-const uploadFileToS3 = async (file: Express.Multer.File): Promise<string> => {
-    const key = `forms/${Date.now()}_${file.originalname}`;
-    const command = new PutObjectCommand({
-        Bucket: config.aws_s3_bucket,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-    });
-    try {
-        await s3Client.send(command);
-        return key;
-    } catch (error) {
-        throw new Error(`Error uploading ${file.originalname} to S3: ${error}`);
-    }
-};
 
 export const createActivityProposal = async (
     req: AuthRequest,
     res: Response
 ) => {
-    const {
-        attendees,
-        date,
-        startTime,
-        endTime,
-        venue,
-        title,
-        participants,
-        purpose,
-        requirements,
-        organizationId,
-    } = req.body;
-
-    const files = req.files as
-        | {
-              [fieldname: string]: Express.Multer.File[];
-          }
-        | undefined;
     try {
-        let cashFormData: string | null = null;
-        let foodFormData: string | null = null;
-        let supplyFormData: string | null = null;
-        let reproductionFormData: string | null = null;
-        let otherFormData: string | null = null;
+        if (!req.user?.userId) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
 
-        if (files?.cashForm?.[0]) {
-            cashFormData = await uploadFileToS3(files.cashForm[0]);
+        const {
+            cashForm,
+            foodForm,
+            supplyForm,
+            reproductionForm,
+            otherForm,
+            attendees,
+            date,
+            startTime,
+            endTime,
+            venueId,
+            title,
+            participants,
+            purpose,
+            requirements,
+            organizationId,
+        } = req.body;
+
+        // Validate required fields
+        if (!date || !startTime || !endTime || !venueId || !title) {
+            return res.status(400).json({ message: "Missing required fields" });
         }
-        if (files?.foodForm?.[0]) {
-            foodFormData = await uploadFileToS3(files.foodForm[0]);
-        }
-        if (files?.supplyForm?.[0]) {
-            supplyFormData = await uploadFileToS3(files.supplyForm[0]);
-        }
-        if (files?.reproductionForm?.[0]) {
-            reproductionFormData = await uploadFileToS3(
-                files.reproductionForm[0]
-            );
-        }
-        if (files?.otherForm?.[0]) {
-            otherFormData = await uploadFileToS3(files.otherForm[0]);
-        }
-        await prisma.activityProposal.create({
+
+        const proposal = await prisma.activityProposal.create({
             data: {
-                cashForm: cashFormData,
-                foodForm: foodFormData,
-                supplyForm: supplyFormData,
-                reproductionForm: reproductionFormData,
-                otherForm: otherFormData,
+                cashForm: cashForm || null,
+                foodForm: foodForm || null,
+                supplyForm: supplyForm || null,
+                reproductionForm: reproductionForm || null,
+                otherForm: otherForm || null,
                 attendees: parseInt(attendees),
-                date,
-                startTime,
-                endTime,
-                venue,
+                date: new Date(date),
+                startTime: String(startTime),
+                endTime: String(endTime),
+                venueId: parseInt(venueId),
                 title,
                 participants,
                 purpose,
                 requirements,
-                userId: Number(req.user?.userId),
-                organizationId: Number(organizationId),
+                userId: req.user.userId,
+                organizationId: parseInt(organizationId),
             },
         });
+
         res.status(201).json({
             message: "Activity Proposal created successfully",
+            proposal,
         });
     } catch (error) {
+        console.error("Error creating Activity Proposal:", error);
         res.status(500).json({
             message: "Error creating Activity Proposal",
-            error,
+        });
+    }
+};
+
+export const getActivityProposals = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user?.userId) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.userId },
+            select: { organizationId: true },
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const activityProposals = await prisma.activityProposal.findMany({
+            where: {
+                organizationId: user.organizationId,
+            },
+            select: {
+                id: true,
+                title: true,
+                updatedAt: true,
+            },
+        });
+        res.status(200).json(activityProposals);
+    } catch (error) {
+        console.error("Error fetching Activity Proposals:", error);
+        res.status(500).json({
+            message: "Error fetching Activity Proposals",
         });
     }
 };
