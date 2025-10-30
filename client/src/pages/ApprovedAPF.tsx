@@ -2,14 +2,24 @@ import Layout from "@/layouts/Layout";
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import type { SubmittedAPF } from "@/types/SubmittedAPF";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/api/axios";
+import { Link } from "react-router";
 
 function ApprovedAPF() {
+    const { data: approvedAPFData } = useQuery({
+        queryKey: ["approvedAPF"],
+        queryFn: async () => {
+            const response = await api.get("/apf/approved");
+            return response.data as SubmittedAPF[];
+        },
+    });
     return (
         <Layout>
             <div className="p-4">
@@ -17,9 +27,6 @@ function ApprovedAPF() {
                     Approved APF
                 </h1>
                 <Table>
-                    <TableCaption>
-                        A list of departments approved activity proposals.
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Activity Proposal Title</TableHead>
@@ -27,10 +34,31 @@ function ApprovedAPF() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Date</TableCell>
-                        </TableRow>
+                        {approvedAPFData && approvedAPFData.length > 0 ? (
+                            approvedAPFData.map((apf) => (
+                                <TableRow key={apf.id}>
+                                    <TableCell>
+                                        <Link to={`/apf/${apf.id}`}>
+                                            {apf.title}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell>
+                                        {new Date(
+                                            apf.updatedAt
+                                        ).toLocaleDateString()}
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={2}
+                                    className="text-center text-gray-500"
+                                >
+                                    No approved activity proposals found
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </div>

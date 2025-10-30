@@ -12,9 +12,9 @@ import { Link } from "react-router";
 function Dashboard() {
     const cardData = [
         {
-            title: "Submitted APF",
-            desc: "This is the submitted APF.",
-            link: "/submitted-apf",
+            title: "Pending APF",
+            desc: "This is the pending APF.",
+            link: "/pending-apf",
         },
         {
             title: "Approved APF",
