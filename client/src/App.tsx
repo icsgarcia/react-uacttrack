@@ -8,9 +8,10 @@ import Register from "./pages/Register";
 import DownloadableForms from "./pages/DownloadableForms";
 import ExternalLinks from "./pages/ExternalLinks";
 import CreateAPF from "./pages/CreateAPF";
-import SubmittedAPF from "./pages/SubmittedAPF";
+import PendingAPF from "./pages/PendingAPF";
 import ApprovedAPF from "./pages/ApprovedAPF";
 import RejectedAPF from "./pages/RejectedAPF";
+import APF from "./pages/APF";
 
 function App() {
     const queryClient = new QueryClient();
@@ -29,9 +30,10 @@ function App() {
                                 element={<DownloadableForms />}
                             />
                             <Route path="/create-apf" element={<CreateAPF />} />
+                            <Route path="/apf/:id" element={<APF />} />
                             <Route
-                                path="/submitted-apf"
-                                element={<SubmittedAPF />}
+                                path="/pending-apf"
+                                element={<PendingAPF />}
                             />
                             <Route
                                 path="/external-links"

@@ -2,7 +2,6 @@ import Layout from "@/layouts/Layout";
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
@@ -10,18 +9,14 @@ import {
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/api/axios";
+import { Link } from "react-router";
+import type { SubmittedAPF } from "@/types/SubmittedAPF";
 
-interface SubmittedAPF {
-    id: number;
-    title: string;
-    updatedAt: string;
-}
-
-function SubmittedAPF() {
-    const { data: submittedAPFData } = useQuery({
-        queryKey: ["submittedAPF"],
+function PendingAPF() {
+    const { data: pendingAPFData } = useQuery({
+        queryKey: ["pendingAPF"],
         queryFn: async () => {
-            const response = await api.get("/apf/");
+            const response = await api.get("/apf/pending");
             return response.data as SubmittedAPF[];
         },
     });
@@ -32,9 +27,6 @@ function SubmittedAPF() {
                     Submitted APF
                 </h1>
                 <Table>
-                    <TableCaption>
-                        A list of departments submitted activity proposals.
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Activity Proposal Title</TableHead>
@@ -42,10 +34,14 @@ function SubmittedAPF() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {submittedAPFData && submittedAPFData.length > 0 ? (
-                            submittedAPFData.map((apf) => (
+                        {pendingAPFData && pendingAPFData.length > 0 ? (
+                            pendingAPFData.map((apf) => (
                                 <TableRow key={apf.id}>
-                                    <TableCell>{apf.title}</TableCell>
+                                    <TableCell>
+                                        <Link to={`/apf/${apf.id}`}>
+                                            {apf.title}
+                                        </Link>
+                                    </TableCell>
                                     <TableCell>
                                         {new Date(
                                             apf.updatedAt
@@ -59,7 +55,7 @@ function SubmittedAPF() {
                                     colSpan={2}
                                     className="text-center text-gray-500"
                                 >
-                                    No activity proposals found
+                                    No pending activity proposals found
                                 </TableCell>
                             </TableRow>
                         )}
@@ -70,4 +66,4 @@ function SubmittedAPF() {
     );
 }
 
-export default SubmittedAPF;
+export default PendingAPF;

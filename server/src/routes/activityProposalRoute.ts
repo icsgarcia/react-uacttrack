@@ -1,7 +1,10 @@
 import { Router } from "express";
 import {
     createActivityProposal,
-    getActivityProposals,
+    getActivityProposalById,
+    getPendingActivityProposals,
+    getApprovedActivityProposals,
+    getRejectedActivityProposals,
 } from "../controllers/activityProposalController";
 import { authenticateToken } from "../middlewares/authMiddleware";
 
@@ -13,6 +16,21 @@ activityProposalRouter.post(
     createActivityProposal
 );
 
-activityProposalRouter.get("/", authenticateToken, getActivityProposals);
+activityProposalRouter.get(
+    "/pending",
+    authenticateToken,
+    getPendingActivityProposals
+);
+activityProposalRouter.get(
+    "/approved",
+    authenticateToken,
+    getApprovedActivityProposals
+);
+activityProposalRouter.get(
+    "/rejected",
+    authenticateToken,
+    getRejectedActivityProposals
+);
+activityProposalRouter.get("/:id", authenticateToken, getActivityProposalById);
 
 export default activityProposalRouter;

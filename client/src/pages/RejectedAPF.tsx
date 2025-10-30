@@ -2,14 +2,24 @@ import Layout from "@/layouts/Layout";
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import type { SubmittedAPF } from "@/types/SubmittedAPF";
+import api from "@/api/axios";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router";
 
 function RejectedAPF() {
+    const { data: rejectedAPFData } = useQuery({
+        queryKey: ["rejectedAPF"],
+        queryFn: async () => {
+            const response = await api.get("/apf/rejected");
+            return response.data as SubmittedAPF[];
+        },
+    });
     return (
         <Layout>
             <div className="p-4">
@@ -17,9 +27,6 @@ function RejectedAPF() {
                     Rejected APF
                 </h1>
                 <Table>
-                    <TableCaption>
-                        A list of departments rejected activity proposals.
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Activity Proposal Title</TableHead>
@@ -27,10 +34,31 @@ function RejectedAPF() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Date</TableCell>
-                        </TableRow>
+                        {rejectedAPFData && rejectedAPFData.length > 0 ? (
+                            rejectedAPFData.map((apf) => (
+                                <TableRow key={apf.id}>
+                                    <TableCell>
+                                        <Link to={`/apf/${apf.id}`}>
+                                            {apf.title}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell>
+                                        {new Date(
+                                            apf.updatedAt
+                                        ).toLocaleDateString()}
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={2}
+                                    className="text-center text-gray-500"
+                                >
+                                    No rejected activity proposals found
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </div>
