@@ -10,6 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import useAuth from "@/hooks/useAuth";
 
 interface Organization {
     id: number;
@@ -26,6 +27,7 @@ interface RegisterForm {
 }
 
 function Register() {
+    const { register } = useAuth();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [registerForm, setRegisterForm] = useState<RegisterForm>({
         firstName: "",
@@ -61,7 +63,7 @@ function Register() {
             return;
         }
         try {
-            await api.post("/auth/register", registerForm);
+            await register(registerForm);
         } catch (error) {
             console.error("Error registering user:", error);
         }
