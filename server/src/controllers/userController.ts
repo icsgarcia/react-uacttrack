@@ -11,6 +11,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 const prisma = new PrismaClient();
 
 const createPresignedUrlWithClient = ({ key }: { key: string }) => {
+    if (!key) return null;
+
     const command = new GetObjectCommand({
         Bucket: config.aws_s3_bucket,
         Key: key,
@@ -26,20 +28,37 @@ const generateAccessToken = (userId: number) => {
 
 const generateRefreshToken = (userId: number) => {
     return jwt.sign({ userId }, config.refresh_token as Secret, {
-        expiresIn: "7d",
+        expiresIn: "1d",
+    });
+};
+
+const setAccessTokenCookie = (res: Response, accessToken: string) => {
+    res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 15 * 60 * 1000,
+        path: "/",
+    });
+};
+const setRefreshTokenCookie = (res: Response, refreshToken: string) => {
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/",
     });
 };
 
 export const register = async (req: Request, res: Response) => {
     const { firstName, lastName, organizationId, email, password } = req.body;
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
         }
-
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
             data: {
                 firstName,
@@ -49,18 +68,19 @@ export const register = async (req: Request, res: Response) => {
                 password: hashedPassword,
             },
         });
-        const accessToken = generateAccessToken(user.id);
-        const refreshToken = generateRefreshToken(user.id);
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
 
-        await prisma.refreshToken.create({
-            data: {
-                token: refreshToken,
-                userId: user.id,
-                expiresAt: expiryDate,
-            },
-        });
+        // const accessToken = generateAccessToken(user.id);
+        // const refreshToken = generateRefreshToken(user.id);
+        // const expiryDate = new Date();
+        // expiryDate.setDate(expiryDate.getDate() + 7);
+
+        // await prisma.refreshToken.create({
+        //     data: {
+        //         token: refreshToken,
+        //         userId: user.id,
+        //         expiresAt: expiryDate,
+        //     },
+        // });
 
         res.status(201).json({
             message: "User registered successfully",
@@ -73,7 +93,24 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     try {
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findUnique({
+            where: { email },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                role: true,
+                password: true,
+                organizationId: true,
+                Organization: {
+                    select: {
+                        name: true,
+                        logo: true,
+                    },
+                },
+            },
+        });
         if (!user) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
@@ -82,24 +119,18 @@ export const login = async (req: Request, res: Response) => {
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
-        const organization = await prisma.organization.findUnique({
-            where: { id: user.organizationId },
-            select: { id: true, name: true, logo: true },
-        });
 
-        // if (organization && organization.logo) {
-        //     logoUrl = `https://${config.aws_s3_bucket}.s3.${config.aws_region}.amazonaws.com/${organization.logo}`;
-        // }
-
-        const logoUrl = await createPresignedUrlWithClient({
-            key: organization?.logo || "",
-        });
+        const logoUrl = user.Organization?.logo
+            ? await createPresignedUrlWithClient({
+                  key: user.Organization.logo,
+              })
+            : null;
 
         const accessToken = generateAccessToken(user.id);
         const refreshToken = generateRefreshToken(user.id);
 
         const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
+        expiryDate.setDate(expiryDate.getDate() + 1);
 
         await prisma.refreshToken.create({
             data: {
@@ -109,16 +140,17 @@ export const login = async (req: Request, res: Response) => {
             },
         });
 
+        setAccessTokenCookie(res, accessToken);
+        setRefreshTokenCookie(res, refreshToken);
+
         const { password: _, ...userWithoutPassword } = user;
 
         res.status(200).json({
             message: "Login successful",
             user: {
                 ...userWithoutPassword,
-                organization: { ...organization, logoUrl },
+                logoUrl,
             },
-            accessToken,
-            refreshToken,
         });
     } catch (error) {
         res.status(500).json({ message: "Error logging in user" });
@@ -126,7 +158,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const refreshToken = async (req: Request, res: Response) => {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
         return res.status(400).json({ message: "Refresh token is required" });
@@ -163,7 +195,7 @@ export const refreshToken = async (req: Request, res: Response) => {
         });
 
         const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
+        expiryDate.setDate(expiryDate.getDate() + 1);
 
         await prisma.refreshToken.create({
             data: {
@@ -173,9 +205,11 @@ export const refreshToken = async (req: Request, res: Response) => {
             },
         });
 
+        setAccessTokenCookie(res, newAccessToken);
+        setRefreshTokenCookie(res, newRefreshToken);
+
         res.json({
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
+            message: "Token refreshed successfully",
         });
     } catch (error) {
         res.status(500).json({ message: "Error refreshing token" });
@@ -183,16 +217,31 @@ export const refreshToken = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies;
     if (!refreshToken) {
         return res.status(400).json({ message: "Refresh token is required" });
     }
 
     try {
         await prisma.refreshToken.updateMany({
-            where: { token: refreshToken },
+            where: { token: refreshToken, revoked: false },
             data: { revoked: true },
         });
+
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        });
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        });
+
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Error logging out" });
@@ -214,6 +263,14 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
                 firstName: true,
                 lastName: true,
                 email: true,
+                role: true,
+                organizationId: true,
+                Organization: {
+                    select: {
+                        name: true,
+                        logo: true,
+                    },
+                },
             },
         });
 
@@ -221,7 +278,21 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        res.status(200).json({ user });
+        const logoUrl = user.Organization?.logo
+            ? await createPresignedUrlWithClient({
+                  key: user.Organization.logo,
+              })
+            : null;
+
+        res.status(200).json({
+            user: {
+                ...user,
+                organization: {
+                    ...user.Organization,
+                    logoUrl,
+                },
+            },
+        });
     } catch (error) {
         console.error("Error fetching profile:", error);
         res.status(500).json({ message: "Error fetching user profile" });
