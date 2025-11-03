@@ -8,15 +8,15 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
-import api from "@/api/axios";
 import { Link } from "react-router";
 import type { SubmittedAPF } from "@/types/SubmittedAPF";
+import axios from "@/api/axios";
 
 function PendingAPF() {
     const { data: pendingAPFData } = useQuery({
         queryKey: ["pendingAPF"],
         queryFn: async () => {
-            const response = await api.get("/apf/pending");
+            const response = await axios.get("/apf/pending");
             return response.data as SubmittedAPF[];
         },
     });

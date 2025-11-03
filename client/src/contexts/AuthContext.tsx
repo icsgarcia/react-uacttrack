@@ -4,44 +4,39 @@ export interface User {
     id: number;
     firstName: string;
     lastName: string;
+    role: string;
     email: string;
-    organization: {
+    organizationId: number;
+    Organization: {
         id: number;
         name: string;
-        logo: string;
-        logoUrl: string;
+        logo: string | null;
     };
+    logoUrl: string | undefined;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
     user: User | null;
-    isAuthenticated: boolean;
     isLoading: boolean;
-    login: ({
-        email,
-        password,
-    }: {
-        email: string;
-        password: string;
-    }) => Promise<void>;
-    register: (
-        firstName: string,
-        lastName: string,
-        email: string,
-        password: string
-    ) => Promise<void>;
+    login: (data: LoginData) => Promise<void>;
+    register: (data: RegisterData) => Promise<void>;
     logout: () => Promise<void>;
-    error: string | null;
+    isRole: (roles: string | string[]) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({
-    user: null,
-    isAuthenticated: false,
-    isLoading: false,
-    login: async () => {},
-    register: async () => {},
-    logout: async () => {},
-    error: null,
-});
+export interface LoginData {
+    email: string;
+    password: string;
+}
 
-export default AuthContext;
+export interface RegisterData {
+    firstName: string;
+    lastName: string;
+    email: string;
+    organizationId: number;
+    password: string;
+}
+
+export const AuthContext = createContext<AuthContextType | undefined>(
+    undefined
+);

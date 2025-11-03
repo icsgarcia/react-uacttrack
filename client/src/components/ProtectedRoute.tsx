@@ -1,13 +1,35 @@
 import useAuth from "@/hooks/useAuth";
 import { Navigate, Outlet } from "react-router";
 
-function ProtectedRoute() {
-    const { isAuthenticated, isLoading } = useAuth();
-
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-    return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+interface ProtectedRouteProps {
+    allowedRoles?: string[];
 }
 
-export default ProtectedRoute;
+export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
+    const { isLoading, user } = useAuth();
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                    <p className="mt-4 text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    // Check role-based access
+    if (allowedRoles && user) {
+        const hasAccess = allowedRoles.includes(user.role);
+        if (!hasAccess) {
+            return <Navigate to="/unauthorized" replace />;
+        }
+    }
+
+    return <Outlet />;
+};

@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router";
-import { AuthProvider } from "./contexts/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./contexts/AuthProvider";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -12,18 +11,24 @@ import PendingAPF from "./pages/PendingAPF";
 import ApprovedAPF from "./pages/ApprovedAPF";
 import RejectedAPF from "./pages/RejectedAPF";
 import APF from "./pages/APF";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { PublicRoute } from "./components/PublicRoute";
 
 function App() {
     const queryClient = new QueryClient();
     return (
-        <AuthProvider>
-            <BrowserRouter>
-                <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
                     <Routes>
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
+                        <Route element={<PublicRoute />}>
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                        </Route>
 
-                        <Route element={<ProtectedRoute />}>
+                        <Route
+                            element={<ProtectedRoute allowedRoles={["USER"]} />}
+                        >
                             <Route path="/" element={<Dashboard />} />
                             <Route
                                 path="/downloadable-forms"
@@ -50,9 +55,9 @@ function App() {
                             />
                         </Route>
                     </Routes>
-                </QueryClientProvider>
-            </BrowserRouter>
-        </AuthProvider>
+                </AuthProvider>
+            </QueryClientProvider>
+        </BrowserRouter>
     );
 }
 

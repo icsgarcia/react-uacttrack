@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import authRouter from "./routes/authRoute";
 import activityProposalRouter from "./routes/activityProposalRoute";
 import organizationRouter from "./routes/organizationRoute";
@@ -9,8 +10,16 @@ import uploadRouter from "./routes/uploadRoute";
 
 const app = express();
 
-app.use(cors());
+const LOCAL_CLIENT_URL = "http://localhost:5173";
+
+app.use(
+    cors({
+        origin: process.env.CLIENT_URL || LOCAL_CLIENT_URL,
+        credentials: true,
+    })
+);
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/auth", authRouter);
 app.use("/apf", activityProposalRouter);
