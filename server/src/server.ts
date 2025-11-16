@@ -7,6 +7,7 @@ import organizationRouter from "./routes/organizationRoute";
 import venueRouter from "./routes/venueRoute";
 import multer from "multer";
 import uploadRouter from "./routes/uploadRoute";
+import calendarRouter from "./routes/calendarRoute";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/auth", authRouter);
 app.use("/apf", activityProposalRouter);
 app.use("/organization", organizationRouter);
 app.use("/venues", venueRouter);
+app.use("/calendar", calendarRouter);
 app.use("/uploads", uploadRouter);
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof multer.MulterError) {
