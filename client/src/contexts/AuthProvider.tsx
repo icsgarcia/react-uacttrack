@@ -1,4 +1,4 @@
-import axios from "@/api/axios";
+import axiosInstance from "@/api/axios";
 import { useEffect, useState, type ReactNode } from "react";
 import {
     AuthContext,
@@ -15,14 +15,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // Call profile endpoint - cookie sent automatically
-                const { data } = await axios.get("/auth/profile");
+                const { data } = await axiosInstance.get("/auth/profile");
                 setUser(data.user);
             } catch (error) {
                 console.error("Auth check failed:", error);
                 setUser(null);
             } finally {
-                setIsLoading(false); // ✅ Always set loading to false
+                setIsLoading(false);
             }
         };
 
@@ -31,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = async ({ email, password }: LoginData) => {
         try {
-            const { data } = await axios.post("auth/login", {
+            const { data } = await axiosInstance.post("auth/login", {
                 email,
                 password,
             });
@@ -50,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
     }: RegisterData) => {
         try {
-            await axios.post("auth/register", {
+            await axiosInstance.post("auth/register", {
                 firstName,
                 lastName,
                 email,
@@ -66,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         try {
-            await axios.post("/auth/logout");
+            await axiosInstance.post("/auth/logout");
         } catch (error) {
             console.error("Logout error:", error);
         } finally {

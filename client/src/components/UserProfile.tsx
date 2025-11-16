@@ -1,19 +1,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useAuth from "@/hooks/useAuth";
 import { Bell, Mail } from "lucide-react";
-import { useEffect } from "react";
 
 function UserProfile() {
     const { user } = useAuth();
-    useEffect(() => {
-        console.log(user);
-    }, [user]);
     return (
         <div className="flex justify-between items-center mb-4">
             <div className="flex gap-4 items-center">
                 <Avatar>
-                    <AvatarImage src={user?.logoUrl} />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <AvatarImage src={user?.organizationId.logo} />
+                    <AvatarFallback>{user?.organizationId.name}</AvatarFallback>
                 </Avatar>
                 <p>
                     Welcome, {user?.firstName} {user?.lastName}

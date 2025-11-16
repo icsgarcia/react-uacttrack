@@ -18,33 +18,25 @@ import {
 } from "@/components/ui/select";
 import Layout from "@/layouts/Layout";
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import api from "@/api/axios";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import useAuth from "@/hooks/useAuth";
-import { uploadFilesAndCreateAPF } from "@/utils/s3Upload";
+import { useMutation } from "@tanstack/react-query";
+import { uploadFilesAndCreateAPF } from "@/utils/S3Upload";
+import useVenues from "@/hooks/useVenues";
 
 interface FormData {
+    title: string;
+    purpose: string;
+    participants: string;
+    attendees: number;
+    requirements: string;
+    date: string;
+    startTime: string;
+    endTime: string;
     cashForm: File | null;
     foodForm: File | null;
     supplyForm: File | null;
     reproductionForm: File | null;
     otherForm: File | null;
-    attendees: number;
-    date: string;
-    startTime: string;
-    endTime: string;
     venueId: string;
-    title: string;
-    participants: string;
-    purpose: string;
-    requirements: string;
-    organizationId: number;
-}
-
-interface Venue {
-    id: number;
-    name: string;
-    capacity: number;
 }
 
 const optionalForms = [
@@ -70,38 +62,34 @@ const optionalForms = [
 ];
 
 function CreateAPF() {
-    const { user } = useAuth();
+    const { data: venues } = useVenues();
     const [formData, setFormData] = useState<FormData>({
+        title: "",
+        purpose: "",
+        participants: "",
+        attendees: 0,
+        requirements: "",
+        date: "",
+        startTime: "",
+        endTime: "",
         cashForm: null,
         foodForm: null,
         supplyForm: null,
         reproductionForm: null,
         otherForm: null,
-        attendees: 0,
-        date: "",
-        startTime: "",
-        endTime: "",
         venueId: "",
-        title: "",
-        participants: "",
-        purpose: "",
-        requirements: "",
-        organizationId: user!.organization.id,
     });
 
-    const fetchVenues = async (): Promise<Venue[]> => {
-        try {
-            const response = await api.get("/venues");
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching venues:", error);
-            return [];
-        }
-    };
-    const { data: venues } = useQuery<Venue[]>({
-        queryKey: ["venues"],
-        queryFn: fetchVenues,
-    });
+    // const submitAPF = async (formData: FormData) => {
+    //     const files = [
+    //         {name: "cashForm", file: formData.cashForm},
+    //         {name: "foodForm", file: formData.foodForm},
+    //         {name: "supplyForm", file: formData.supplyForm},
+    //         {name: "reproductionForm", file: formData.reproductionForm},
+    //         {name: "otherForm", file: formData.otherForm},
+    //     ]
+    // }
+
     const mutation = useMutation({
         mutationFn: () => uploadFilesAndCreateAPF(formData),
         onSuccess: () => {
@@ -229,8 +217,8 @@ function CreateAPF() {
                                     {venues &&
                                         venues.map((venue) => (
                                             <SelectItem
-                                                key={venue.id}
-                                                value={String(venue.id)}
+                                                key={venue._id}
+                                                value={venue._id}
                                             >
                                                 {venue.name}
                                             </SelectItem>

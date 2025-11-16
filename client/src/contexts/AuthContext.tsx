@@ -1,18 +1,16 @@
 import { createContext } from "react";
 
 export interface User {
-    id: number;
+    _id: string;
     firstName: string;
     lastName: string;
-    role: string;
+    role: "STUDENT" | "HEAD" | "OSA" | "VPA" | "VPAA";
     email: string;
-    organizationId: number;
-    Organization: {
-        id: number;
+    organizationId: {
+        _id: string;
         name: string;
-        logo: string | null;
+        logo: string;
     };
-    logoUrl: string | undefined;
 }
 
 export interface AuthContextType {
@@ -33,7 +31,7 @@ export interface RegisterData {
     firstName: string;
     lastName: string;
     email: string;
-    organizationId: number;
+    organizationId: string;
     password: string;
 }
 

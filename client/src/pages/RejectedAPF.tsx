@@ -8,15 +8,15 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import type { SubmittedAPF } from "@/types/SubmittedAPF";
-import api from "@/api/axios";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
+import axiosInstance from "@/api/axios";
 
 function RejectedAPF() {
     const { data: rejectedAPFData } = useQuery({
         queryKey: ["rejectedAPF"],
         queryFn: async () => {
-            const response = await api.get("/apf/rejected");
+            const response = await axiosInstance.get("/apf/rejected");
             return response.data as SubmittedAPF[];
         },
     });
@@ -36,9 +36,9 @@ function RejectedAPF() {
                     <TableBody>
                         {rejectedAPFData && rejectedAPFData.length > 0 ? (
                             rejectedAPFData.map((apf) => (
-                                <TableRow key={apf.id}>
+                                <TableRow key={apf._id}>
                                     <TableCell>
-                                        <Link to={`/apf/${apf.id}`}>
+                                        <Link to={`/apf/${apf._id}`}>
                                             {apf.title}
                                         </Link>
                                     </TableCell>

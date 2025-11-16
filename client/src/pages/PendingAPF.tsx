@@ -10,13 +10,13 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import type { SubmittedAPF } from "@/types/SubmittedAPF";
-import axios from "@/api/axios";
+import axiosInstance from "@/api/axios";
 
 function PendingAPF() {
     const { data: pendingAPFData } = useQuery({
         queryKey: ["pendingAPF"],
         queryFn: async () => {
-            const response = await axios.get("/apf/pending");
+            const response = await axiosInstance.get("/apf/pending");
             return response.data as SubmittedAPF[];
         },
     });
@@ -30,15 +30,15 @@ function PendingAPF() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Activity Proposal Title</TableHead>
-                            <TableHead>Date</TableHead>
+                            <TableHead>Updated At</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {pendingAPFData && pendingAPFData.length > 0 ? (
                             pendingAPFData.map((apf) => (
-                                <TableRow key={apf.id}>
+                                <TableRow key={apf._id}>
                                     <TableCell>
-                                        <Link to={`/apf/${apf.id}`}>
+                                        <Link to={`/apf/${apf._id}`}>
                                             {apf.title}
                                         </Link>
                                     </TableCell>

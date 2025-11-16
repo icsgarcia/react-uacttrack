@@ -10,11 +10,9 @@ import uploadRouter from "./routes/uploadRoute";
 
 const app = express();
 
-const LOCAL_CLIENT_URL = "http://localhost:5173";
-
 app.use(
     cors({
-        origin: process.env.CLIENT_URL || LOCAL_CLIENT_URL,
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
         credentials: true,
     })
 );
