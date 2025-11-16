@@ -5,16 +5,14 @@ import {
     getPendingActivityProposals,
     getApprovedActivityProposals,
     getRejectedActivityProposals,
+    rejectApf,
+    approveApf,
 } from "../controllers/activityProposalController";
 import { authenticateToken } from "../middlewares/authMiddleware";
 
 const activityProposalRouter = Router();
 
-activityProposalRouter.post(
-    "/create",
-    authenticateToken,
-    createActivityProposal
-);
+activityProposalRouter.post("/", authenticateToken, createActivityProposal);
 
 activityProposalRouter.get(
     "/pending",
@@ -31,6 +29,8 @@ activityProposalRouter.get(
     authenticateToken,
     getRejectedActivityProposals
 );
+activityProposalRouter.patch("/reject/:id", authenticateToken, rejectApf);
+activityProposalRouter.patch("/approve/:id", authenticateToken, approveApf);
 activityProposalRouter.get("/:id", authenticateToken, getActivityProposalById);
 
 export default activityProposalRouter;

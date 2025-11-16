@@ -1,11 +1,9 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "../../generated/prisma";
-
-const prisma = new PrismaClient();
+import Venue from "../models/venueModel";
 
 export const getVenues = async (req: Request, res: Response) => {
     try {
-        const venues = await prisma.venue.findMany();
+        const venues = await Venue.find();
 
         res.status(200).json(venues);
     } catch (error) {

@@ -1,6 +1,6 @@
 import api from "@/api/axios";
 import Layout from "@/layouts/Layout";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import {
     Card,
@@ -21,32 +21,61 @@ import {
     Building2,
     User,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import useAuth from "@/hooks/useAuth";
+import axiosInstance from "@/api/axios";
 
 interface APFData {
-    id: number;
+    _id: string;
     attendees: number;
     date: Date;
     startTime: string;
     endTime: string;
-    venueId: number;
     title: string;
     participants: string;
     purpose: string;
     requirements: string;
-    adminApproval: string;
-    deanApproval: string;
-    vpaApproval: string;
-    vpaaApproval: string;
+    headStatus: string;
+    osaStatus: string;
+    vpaStatus: string;
+    vpaaStatus: string;
     status: string;
     createdAt: Date;
     updatedAt: Date;
-    userId: number;
-    organizationId: number;
-    creatorFirstName: string;
-    creatorLastName: string;
-    organization: string;
-    organizationAdmin: string;
-    venue: string;
+    venueId: {
+        _id: string;
+        name: string;
+        capacity: number;
+    };
+    userId: {
+        _id: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        email: string;
+        password: string;
+        createdAt: Date;
+        updatedAt: Date;
+        organizationId: string;
+    };
+    organizationId: {
+        _id: string;
+        name: string;
+        logo: string;
+    };
+    files: {
+        cashFormFile: string;
+        foodFormFile: string;
+        supplyFormFile: string;
+        reproductionFormFile: string;
+        otherFormFile: string;
+    };
+}
+
+interface FileItem {
+    label: string;
+    key: string;
+    url: keyof APFData["files"];
 }
 
 const getStatusColor = (status: string) => {
@@ -60,10 +89,25 @@ const getStatusColor = (status: string) => {
 };
 
 function APF() {
+    const queryClient = useQueryClient();
+    const { user } = useAuth();
     const params = useParams();
+
+    const fileItems: FileItem[] = [
+        { label: "Check Payment / Cash", key: "cashForm", url: "cashFormFile" },
+        { label: "Food", key: "foodForm", url: "foodFormFile" },
+        { label: "Supplies", key: "supplyForm", url: "supplyFormFile" },
+        {
+            label: "Reproduction",
+            key: "reproductionForm",
+            url: "reproductionFormFile",
+        },
+        { label: "Others", key: "otherForm", url: "otherFormFile" },
+    ];
 
     const getAPFById = async () => {
         const { data } = await api.get(`/apf/${params.id}`);
+        console.log(data);
         return data as APFData;
     };
 
@@ -71,6 +115,34 @@ function APF() {
         queryKey: ["apf", params.id],
         queryFn: getAPFById,
     });
+
+    const showActionButtons =
+        data?.status === "PENDING" &&
+        ((user?.role === "HEAD" && data?.headStatus === "PENDING") ||
+            (user?.role === "OSA" && data?.osaStatus === "PENDING") ||
+            (user?.role === "VPA" && data?.vpaStatus === "PENDING") ||
+            (user?.role === "VPAA" && data?.vpaaStatus === "PENDING"));
+
+    const handleReject = async () => {
+        try {
+            await axiosInstance.patch(`/apf/reject/${params.id}`);
+            queryClient.invalidateQueries({ queryKey: ["apf", params.id] });
+            alert("Activity Proposal rejected successfully.");
+        } catch (error) {
+            console.error(error);
+            alert(`Failed to reject activity proposal: ${error}`);
+        }
+    };
+    const handleApprove = async () => {
+        try {
+            await axiosInstance.patch(`/apf/approve/${params.id}`);
+            queryClient.invalidateQueries({ queryKey: ["apf", params.id] });
+            alert("Activity Proposal approved successfully.");
+        } catch (error) {
+            console.error(error);
+            alert(`Failed to approve activity proposal: ${error}`);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -123,7 +195,7 @@ function APF() {
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                             <span className="font-semibold">Control No:</span>
                             <span className="font-mono bg-gray-100 px-3 py-1 rounded">
-                                AF-{String(data.id).padStart(6, "0")}
+                                AF-{String(data._id).padStart(6, "0")}
                             </span>
                         </div>
                     </CardHeader>
@@ -144,7 +216,7 @@ function APF() {
                                     Department/Office
                                 </p>
                                 <p className="text-base font-medium">
-                                    {data.organization}
+                                    {data.organizationId.name}
                                 </p>
                             </div>
                         </div>
@@ -156,8 +228,8 @@ function APF() {
                                     Prepared By
                                 </p>
                                 <p className="text-base font-medium">
-                                    {data.creatorFirstName}{" "}
-                                    {data.creatorLastName}
+                                    {data.userId.firstName}{" "}
+                                    {data.userId.lastName}
                                 </p>
                             </div>
                         </div>
@@ -212,7 +284,7 @@ function APF() {
                                         Venue
                                     </p>
                                     <p className="text-base font-medium">
-                                        {data.venue}
+                                        {data.venueId.name}
                                     </p>
                                 </div>
                             </div>
@@ -291,33 +363,7 @@ function APF() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {[
-                                        {
-                                            label: "Check Payment / Cash",
-                                            key: "cashForm",
-                                            url: "cashFormFile",
-                                        },
-                                        {
-                                            label: "Food",
-                                            key: "foodForm",
-                                            url: "foodFormFile",
-                                        },
-                                        {
-                                            label: "Supplies",
-                                            key: "supplyForm",
-                                            url: "supplyFormFile",
-                                        },
-                                        {
-                                            label: "Reproduction",
-                                            key: "reproductionForm",
-                                            url: "reproductionFormFile",
-                                        },
-                                        {
-                                            label: "Others",
-                                            key: "otherForm",
-                                            url: "otherFormFile",
-                                        },
-                                    ].map((item) => (
+                                    {fileItems.map((item) => (
                                         <tr
                                             key={item.key}
                                             className="hover:bg-gray-50"
@@ -326,16 +372,15 @@ function APF() {
                                                 {item.label}
                                             </td>
                                             <td className="border border-gray-300 px-4 py-3 text-center">
-                                                {(data as any)[item.key] ? (
-                                                    // <Badge className="bg-green-100 text-green-700 border-green-300">
-                                                    //     ✓ Attached
-                                                    // </Badge>
+                                                {data.files ? (
                                                     <a
-                                                        href={data[item.url]}
+                                                        href={
+                                                            data.files[item.url]
+                                                        }
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         download={
-                                                            data[item.url]
+                                                            data.files[item.url]
                                                         }
                                                     >
                                                         {item.key}
@@ -365,20 +410,20 @@ function APF() {
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {[
                                 {
-                                    title: "OSA Director",
-                                    status: data.adminApproval || "PENDING",
+                                    title: "Head of Organization",
+                                    status: data.headStatus,
                                 },
                                 {
-                                    title: "Dean",
-                                    status: data.deanApproval || "PENDING",
+                                    title: "Office of Student Affairs",
+                                    status: data.osaStatus,
                                 },
                                 {
-                                    title: "VPAA",
-                                    status: data.vpaaApproval || "PENDING",
+                                    title: "Vice President for Administration",
+                                    status: data.vpaStatus,
                                 },
                                 {
-                                    title: "VPA",
-                                    status: data.vpaApproval || "PENDING",
+                                    title: "Vice President for Academic Affairs",
+                                    status: data.vpaaStatus,
                                 },
                             ].map((approval, index) => (
                                 <div
@@ -418,6 +463,15 @@ function APF() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {showActionButtons && (
+                    <Card>
+                        <CardContent className="flex justify-center items-center gap-8">
+                            <Button onClick={handleReject}>Reject</Button>
+                            <Button onClick={handleApprove}>Approve</Button>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </Layout>
     );

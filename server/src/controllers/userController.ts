@@ -1,14 +1,13 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt, { Secret } from "jsonwebtoken";
-import { PrismaClient } from "../../generated/prisma";
 import config from "../config/config";
 import { AuthRequest } from "../middlewares/authMiddleware";
 import s3Client from "../services/s3Service";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
-const prisma = new PrismaClient();
+import User from "../models/userModel";
+import { Organization } from "../types/Organization";
 
 const createPresignedUrlWithClient = ({ key }: { key: string }) => {
     if (!key) return null;
@@ -20,14 +19,14 @@ const createPresignedUrlWithClient = ({ key }: { key: string }) => {
     return getSignedUrl(s3Client, command, { expiresIn: 3600 });
 };
 
-const generateAccessToken = (userId: number) => {
-    return jwt.sign({ userId }, config.access_token as Secret, {
+const generateAccessToken = (userId: string) => {
+    return jwt.sign({ data: userId }, config.access_token as Secret, {
         expiresIn: "15m",
     });
 };
 
-const generateRefreshToken = (userId: number) => {
-    return jwt.sign({ userId }, config.refresh_token as Secret, {
+const generateRefreshToken = (userId: string) => {
+    return jwt.sign({ data: userId }, config.refresh_token as Secret, {
         expiresIn: "1d",
     });
 };
@@ -41,12 +40,13 @@ const setAccessTokenCookie = (res: Response, accessToken: string) => {
         path: "/",
     });
 };
+
 const setRefreshTokenCookie = (res: Response, refreshToken: string) => {
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 1 * 24 * 60 * 60 * 1000,
         path: "/",
     });
 };
@@ -54,33 +54,19 @@ const setRefreshTokenCookie = (res: Response, refreshToken: string) => {
 export const register = async (req: Request, res: Response) => {
     const { firstName, lastName, organizationId, email, password } = req.body;
     try {
-        const existingUser = await prisma.user.findUnique({ where: { email } });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await prisma.user.create({
-            data: {
-                firstName,
-                lastName,
-                organizationId,
-                email,
-                password: hashedPassword,
-            },
+        const newUser = new User({
+            firstName,
+            lastName,
+            organizationId,
+            email,
+            password: hashedPassword,
         });
-
-        // const accessToken = generateAccessToken(user.id);
-        // const refreshToken = generateRefreshToken(user.id);
-        // const expiryDate = new Date();
-        // expiryDate.setDate(expiryDate.getDate() + 7);
-
-        // await prisma.refreshToken.create({
-        //     data: {
-        //         token: refreshToken,
-        //         userId: user.id,
-        //         expiresAt: expiryDate,
-        //     },
-        // });
+        await newUser.save();
 
         res.status(201).json({
             message: "User registered successfully",
@@ -93,24 +79,7 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     try {
-        const user = await prisma.user.findUnique({
-            where: { email },
-            select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                role: true,
-                password: true,
-                organizationId: true,
-                Organization: {
-                    select: {
-                        name: true,
-                        logo: true,
-                    },
-                },
-            },
-        });
+        const user = await User.findOne({ email }).populate("organizationId");
         if (!user) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
@@ -120,114 +89,42 @@ export const login = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        const logoUrl = user.Organization?.logo
-            ? await createPresignedUrlWithClient({
-                  key: user.Organization.logo,
-              })
-            : null;
-
-        const accessToken = generateAccessToken(user.id);
-        const refreshToken = generateRefreshToken(user.id);
-
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 1);
-
-        await prisma.refreshToken.create({
-            data: {
-                token: refreshToken,
-                userId: user.id,
-                expiresAt: expiryDate,
-            },
+        const logoUrl = await createPresignedUrlWithClient({
+            key: (user.organizationId as Organization).logo,
         });
+
+        const accessToken = generateAccessToken(user._id.toString());
+        const refreshToken = generateRefreshToken(user._id.toString());
 
         setAccessTokenCookie(res, accessToken);
         setRefreshTokenCookie(res, refreshToken);
 
-        const { password: _, ...userWithoutPassword } = user;
+        const userObject = user.toObject() as any; // FIX THIS
+        delete userObject.password;
+
+        userObject.organizationId = {
+            _id: (user.organizationId as Organization)._id,
+            name: (user.organizationId as Organization).name,
+            logo: logoUrl,
+        };
 
         res.status(200).json({
             message: "Login successful",
-            user: {
-                ...userWithoutPassword,
-                logoUrl,
-            },
+            user: userObject,
         });
     } catch (error) {
         res.status(500).json({ message: "Error logging in user" });
     }
 };
 
-export const refreshToken = async (req: Request, res: Response) => {
-    const { refreshToken } = req.cookies;
-
-    if (!refreshToken) {
-        return res.status(400).json({ message: "Refresh token is required" });
-    }
-    try {
-        const payload = jwt.verify(
-            refreshToken,
-            config.refresh_token as string
-        ) as {
-            userId: number;
-        };
-
-        const tokenRecord = await prisma.refreshToken.findFirst({
-            where: {
-                token: refreshToken,
-                userId: payload.userId,
-                revoked: false,
-                expiresAt: { gt: new Date() },
-            },
-        });
-
-        if (!tokenRecord) {
-            return res
-                .status(401)
-                .json({ message: "Invalid or expired refresh token" });
-        }
-
-        const newAccessToken = generateAccessToken(payload.userId);
-        const newRefreshToken = generateRefreshToken(payload.userId);
-
-        await prisma.refreshToken.update({
-            where: { id: tokenRecord.id },
-            data: { revoked: true },
-        });
-
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 1);
-
-        await prisma.refreshToken.create({
-            data: {
-                token: newRefreshToken,
-                userId: payload.userId,
-                expiresAt: expiryDate,
-            },
-        });
-
-        setAccessTokenCookie(res, newAccessToken);
-        setRefreshTokenCookie(res, newRefreshToken);
-
-        res.json({
-            message: "Token refreshed successfully",
-        });
-    } catch (error) {
-        res.status(500).json({ message: "Error refreshing token" });
-    }
-};
-
 export const logout = async (req: Request, res: Response) => {
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
+        res.clearCookie("refreshToken");
         return res.status(400).json({ message: "Refresh token is required" });
     }
 
     try {
-        await prisma.refreshToken.updateMany({
-            where: { token: refreshToken, revoked: false },
-            data: { revoked: true },
-        });
-
         res.clearCookie("accessToken", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -250,51 +147,37 @@ export const logout = async (req: Request, res: Response) => {
 
 export const getProfile = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = req.user?.userId;
-
+        const userId = req.userId;
         if (!userId) {
-            return res.status(401).json({ message: "User not authenticated" });
+            return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                role: true,
-                organizationId: true,
-                Organization: {
-                    select: {
-                        name: true,
-                        logo: true,
-                    },
-                },
-            },
-        });
-
+        const user = await User.findById(userId)
+            .select("-password")
+            .populate("organizationId");
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const logoUrl = user.Organization?.logo
-            ? await createPresignedUrlWithClient({
-                  key: user.Organization.logo,
-              })
-            : null;
+        const logoUrl = await createPresignedUrlWithClient({
+            key: (user.organizationId as Organization).logo,
+        });
+
+        const userObject = user.toObject() as any; // FIX THIS
+        delete userObject.password;
+
+        userObject.organizationId = {
+            _id: (user.organizationId as Organization)._id,
+            name: (user.organizationId as Organization).name,
+            logo: logoUrl,
+        };
 
         res.status(200).json({
-            user: {
-                ...user,
-                organization: {
-                    ...user.Organization,
-                    logoUrl,
-                },
-            },
+            message: "Profile fetched successfully",
+            user: userObject,
         });
     } catch (error) {
-        console.error("Error fetching profile:", error);
-        res.status(500).json({ message: "Error fetching user profile" });
+        console.error("Profile error:", error);
+        res.status(500).json({ message: "Error fetching profile" });
     }
 };

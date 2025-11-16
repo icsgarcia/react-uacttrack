@@ -1,16 +1,10 @@
-import { PrismaClient } from "../../generated/prisma";
 import { Request, Response } from "express";
-
-const prisma = new PrismaClient();
+import Organization from "../models/organizationModel";
 
 export const getOrganizations = async (req: Request, res: Response) => {
     try {
-        const organizations = await prisma.organization.findMany({
-            select: {
-                id: true,
-                name: true,
-            },
-        });
+        const organizations = await Organization.find().select("name");
+
         res.status(200).json(organizations);
     } catch (error) {
         console.error("Error fetching organizations:", error);

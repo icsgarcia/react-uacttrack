@@ -1,4 +1,4 @@
-import api from "@/api/axios";
+import axiosInstance from "@/api/axios";
 
 interface UploadPlan {
     file: File;
@@ -22,7 +22,7 @@ async function getPresignedUploads(
         prefix: p.prefix || "forms",
     }));
 
-    const { data } = await api.post("/uploads/presign", { files });
+    const { data } = await axiosInstance.post("/uploads/presign", { files });
     return data.uploads;
 }
 
@@ -43,21 +43,20 @@ async function uploadToS3(url: string, file: File): Promise<void> {
 
 // Main upload function
 export async function uploadFilesAndCreateAPF(formData: {
-    cashForm?: File | null;
-    foodForm?: File | null;
-    supplyForm?: File | null;
-    reproductionForm?: File | null;
-    otherForm?: File | null;
+    title: string;
+    purpose: string;
+    participants: string;
     attendees: number;
+    requirements: string;
     date: string;
     startTime: string;
     endTime: string;
+    cashForm: File | null;
+    foodForm: File | null;
+    supplyForm: File | null;
+    reproductionForm: File | null;
+    otherForm: File | null;
     venueId: string;
-    title: string;
-    participants: string;
-    purpose: string;
-    requirements: string;
-    organizationId: number;
 }) {
     // 1. Build upload plan for files that exist
     const plans: UploadPlan[] = [];
@@ -108,8 +107,7 @@ export async function uploadFilesAndCreateAPF(formData: {
         participants: formData.participants,
         purpose: formData.purpose,
         requirements: formData.requirements,
-        organizationId: formData.organizationId,
     };
 
-    await api.post("/apf/create", payload);
+    await axiosInstance.post("/apf/", payload);
 }

@@ -31,9 +31,9 @@ function Dashboard() {
         <Layout>
             <div className="p-4">
                 <UserProfile />
-                <h1 className="text-3xl text-center text-blue-800 font-semibold mb-8">
+                {/* <h1 className="text-3xl text-center text-blue-800 font-semibold mb-8">
                     Dashboard
-                </h1>
+                </h1> */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                     {cardData.map((card, index) => (
                         <Link key={index} to={card.link}>

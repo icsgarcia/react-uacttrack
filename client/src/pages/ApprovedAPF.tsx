@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/table";
 import type { SubmittedAPF } from "@/types/SubmittedAPF";
 import { useQuery } from "@tanstack/react-query";
-import api from "@/api/axios";
 import { Link } from "react-router";
+import axiosInstance from "@/api/axios";
 
 function ApprovedAPF() {
     const { data: approvedAPFData } = useQuery({
         queryKey: ["approvedAPF"],
         queryFn: async () => {
-            const response = await api.get("/apf/approved");
+            const response = await axiosInstance.get("/apf/approved");
             return response.data as SubmittedAPF[];
         },
     });
@@ -36,9 +36,9 @@ function ApprovedAPF() {
                     <TableBody>
                         {approvedAPFData && approvedAPFData.length > 0 ? (
                             approvedAPFData.map((apf) => (
-                                <TableRow key={apf.id}>
+                                <TableRow key={apf._id}>
                                     <TableCell>
-                                        <Link to={`/apf/${apf.id}`}>
+                                        <Link to={`/apf/${apf._id}`}>
                                             {apf.title}
                                         </Link>
                                     </TableCell>

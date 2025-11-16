@@ -3,6 +3,7 @@ dotenv.config();
 
 interface Config {
     port: number;
+    mongodb_uri: string;
     client_url: string;
     access_token: string;
     refresh_token: string;
@@ -16,6 +17,7 @@ interface Config {
 
 const config: Config = {
     port: Number(process.env.PORT) || 3000,
+    mongodb_uri: process.env.MONGODB_URI || "",
     client_url: process.env.CLIENT_URL || "",
     access_token: process.env.ACCESS_TOKEN_SECRET || "",
     refresh_token: process.env.REFRESH_TOKEN_SECRET || "",

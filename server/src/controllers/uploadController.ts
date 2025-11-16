@@ -28,7 +28,8 @@ const createPresignedGetUrl = async (bucket: string, key: string) => {
 // POST /uploads/presign - Generate multiple pre-signed upload URLs
 export const presignUploads = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?.userId) {
+        const userId = req.userId;
+        if (!userId) {
             return res.status(401).json({ message: "Not authenticated" });
         }
 
@@ -71,7 +72,8 @@ export const presignUploads = async (req: AuthRequest, res: Response) => {
 // GET /uploads/presign-download?key=forms/123_file.pdf - Generate download URL
 export const presignDownload = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?.userId) {
+        const userId = req.userId;
+        if (!userId) {
             return res.status(401).json({ message: "Not authenticated" });
         }
 

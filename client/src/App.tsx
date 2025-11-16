@@ -27,14 +27,23 @@ function App() {
                         </Route>
 
                         <Route
-                            element={<ProtectedRoute allowedRoles={["USER"]} />}
+                            element={
+                                <ProtectedRoute
+                                    allowedRoles={[
+                                        "STUDENT",
+                                        "HEAD",
+                                        "OSA",
+                                        "VPA",
+                                        "VPAA",
+                                    ]}
+                                />
+                            }
                         >
                             <Route path="/" element={<Dashboard />} />
                             <Route
                                 path="/downloadable-forms"
                                 element={<DownloadableForms />}
                             />
-                            <Route path="/create-apf" element={<CreateAPF />} />
                             <Route path="/apf/:id" element={<APF />} />
                             <Route
                                 path="/pending-apf"
@@ -53,6 +62,14 @@ function App() {
                                 path="/rejected-apf"
                                 element={<RejectedAPF />}
                             />
+                        </Route>
+
+                        <Route
+                            element={
+                                <ProtectedRoute allowedRoles={["STUDENT"]} />
+                            }
+                        >
+                            <Route path="/create-apf" element={<CreateAPF />} />
                         </Route>
                     </Routes>
                 </AuthProvider>

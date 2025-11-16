@@ -1,5 +1,5 @@
 export interface SubmittedAPF {
-    id: number;
+    _id: string;
     title: string;
     updatedAt: string;
 }

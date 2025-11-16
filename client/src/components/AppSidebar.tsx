@@ -20,31 +20,40 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import useAuth from "@/hooks/useAuth";
 import { Link } from "react-router";
 
-const items = [
+const menuItems = [
     {
         title: "Dashboard",
         url: "/",
         icon: Home,
+        roles: ["STUDENT", "HEAD", "OSA", "VPA", "VPAA"],
     },
     {
         title: "Create APF",
         url: "/create-apf",
         icon: PenLine,
+        roles: ["STUDENT"],
     },
     {
         title: "Downloadable Forms",
         url: "/downloadable-forms",
         icon: Files,
+        roles: ["STUDENT", "HEAD", "OSA", "VPA", "VPAA"],
     },
     {
         title: "External Links",
         url: "/external-links",
         icon: link,
+        roles: ["STUDENT", "HEAD", "OSA", "VPA", "VPAA"],
     },
 ];
 
 export function AppSidebar() {
     const { user, logout } = useAuth();
+
+    const filteredItems = menuItems.filter((item) => {
+        if (!item.roles) return true;
+        return user?.role && item.roles.includes(user.role);
+    });
 
     return (
         <Sidebar>
@@ -55,7 +64,7 @@ export function AppSidebar() {
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => (
+                            {filteredItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild>
                                         <Link to={item.url}>

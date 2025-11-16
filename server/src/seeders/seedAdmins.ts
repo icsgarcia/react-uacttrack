@@ -1,0 +1,208 @@
+import bcrypt from "bcryptjs";
+import type { Organization } from "../types/Organization";
+import User from "../models/userModel";
+
+async function seedAdmins(organizations: Organization[]) {
+    console.log("Seeding admins...");
+
+    await User.deleteMany();
+
+    const admins = await User.insertMany([
+        {
+            firstName: "AAA",
+            lastName: "AAA",
+            role: "HEAD",
+            email: "aaa@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[0]?._id,
+        },
+        {
+            firstName: "BACC",
+            lastName: "BACC",
+            role: "HEAD",
+            email: "bacc@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[1]?._id,
+        },
+        {
+            firstName: "BHSPHS",
+            lastName: "BHSPHS",
+            role: "HEAD",
+            email: "bhsphs@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[2]?._id,
+        },
+        {
+            firstName: "CDW",
+            lastName: "CDW",
+            role: "HEAD",
+            email: "cdw@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[3]?._id,
+        },
+        {
+            firstName: "CHARMS",
+            lastName: "CHARMS",
+            role: "HEAD",
+            email: "charms@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[4]?._id,
+        },
+        {
+            firstName: "CREATE",
+            lastName: "CREATE",
+            role: "HEAD",
+            email: "create@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[5]?._id,
+        },
+        {
+            firstName: "CRYCYC",
+            lastName: "CRYCYC",
+            role: "HEAD",
+            email: "crycyc@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[6]?._id,
+        },
+        {
+            firstName: "ICPEP",
+            lastName: "ICPEP",
+            role: "HEAD",
+            email: "icpep@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[7]?._id,
+        },
+        {
+            firstName: "INA",
+            lastName: "INA",
+            role: "HEAD",
+            email: "ina@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[8]?._id,
+        },
+        {
+            firstName: "JPIA",
+            lastName: "JPIA",
+            role: "HEAD",
+            email: "jpia@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[9]?._id,
+        },
+        {
+            firstName: "JPPHA",
+            lastName: "JPPHA",
+            role: "HEAD",
+            email: "jppha@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[10]?._id,
+        },
+        {
+            firstName: "LEAD",
+            lastName: "LEAD",
+            role: "HEAD",
+            email: "lead@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[11]?._id,
+        },
+        {
+            firstName: "LTSP",
+            lastName: "LTSP",
+            role: "HEAD",
+            email: "ltsp@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[12]?._id,
+        },
+        {
+            firstName: "MCSA",
+            lastName: "MCSA",
+            role: "HEAD",
+            email: "mcsa@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[13]?._id,
+        },
+        {
+            firstName: "NSC",
+            lastName: "NSC",
+            role: "HEAD",
+            email: "nsc@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[14]?._id,
+        },
+        {
+            firstName: "PICE",
+            lastName: "PICE",
+            role: "HEAD",
+            email: "pice@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[15]?._id,
+        },
+        {
+            firstName: "PIIE",
+            lastName: "PIIE",
+            role: "HEAD",
+            email: "piie@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[16]?._id,
+        },
+        {
+            firstName: "PSYCHSOC",
+            lastName: "PSYCHSOC",
+            role: "HEAD",
+            email: "psychsoc@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[17]?._id,
+        },
+        {
+            firstName: "SSITE",
+            lastName: "SSITE",
+            role: "HEAD",
+            email: "ssite@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[18]?._id,
+        },
+        {
+            firstName: "UACSC",
+            lastName: "UACSC",
+            role: "HEAD",
+            email: "uacsc@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[19]?._id,
+        },
+        {
+            firstName: "UASAO",
+            lastName: "UASAO",
+            role: "HEAD",
+            email: "uasao@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[20]?._id,
+        },
+        {
+            firstName: "OSA",
+            lastName: "OSA",
+            role: "OSA",
+            email: "osa@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[21]?._id,
+        },
+        {
+            firstName: "VPA",
+            lastName: "VPA",
+            role: "VPA",
+            email: "vpa@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[21]?._id,
+        },
+        {
+            firstName: "VPAA",
+            lastName: "VPAA",
+            role: "VPAA",
+            email: "vpaa@ua.edu.ph",
+            password: bcrypt.hashSync("password123", 10),
+            organizationId: organizations[21]?._id,
+        },
+    ]);
+
+    console.log(`${admins.length} Admins created.`);
+}
+
+export default seedAdmins;

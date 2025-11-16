@@ -1,8 +1,6 @@
-import { PrismaClient } from "../../generated/prisma";
+import Venue from "../models/venueModel";
 
-const prisma = new PrismaClient();
-
-const venues = [
+const venuesData = [
     {
         name: "UA Hotel",
         capacity: 250,
@@ -65,17 +63,14 @@ const venues = [
     },
 ];
 
-const seedVenues = async () => {
-    try {
-        for (const venue of venues) {
-            await prisma.venue.create({
-                data: venue,
-            });
-        }
-        console.log("Seeding venues completed successfully.");
-    } catch (error) {
-        console.error("Error seeding venues:", error);
-    }
-};
+async function seedVenues() {
+    console.log("Seeding venues...");
+
+    await Venue.deleteMany();
+
+    const venues = await Venue.insertMany(venuesData);
+
+    console.log(`${venues.length} Venues created.`);
+}
 
 export default seedVenues;
