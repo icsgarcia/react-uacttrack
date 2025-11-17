@@ -13,6 +13,7 @@ import RejectedAPF from "./pages/RejectedAPF";
 import APF from "./pages/APF";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
+import { Toaster } from "./components/ui/sonner";
 
 function App() {
     const queryClient = new QueryClient();
@@ -20,6 +21,8 @@ function App() {
         <BrowserRouter>
             <QueryClientProvider client={queryClient}>
                 <AuthProvider>
+                    <Toaster richColors closeButton />
+
                     <Routes>
                         <Route element={<PublicRoute />}>
                             <Route path="/login" element={<Login />} />

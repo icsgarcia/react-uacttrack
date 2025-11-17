@@ -11,6 +11,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import useAuth from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface Organization {
     _id: string;
@@ -59,13 +60,17 @@ function Register() {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (registerForm.password !== registerForm.confirmPassword) {
-            alert("Passwords do not match!");
+            toast.error("Passwords do not match.");
             return;
         }
         try {
             await register(registerForm);
+            toast.success("User registered successfully!");
         } catch (error) {
             console.error("Error registering user:", error);
+            toast.error(
+                "Registration failed. Please check your details and try again."
+            );
         }
     };
 

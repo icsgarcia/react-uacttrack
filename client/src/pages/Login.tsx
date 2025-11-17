@@ -5,14 +5,13 @@ import {
     InputGroupAddon,
     InputGroupInput,
 } from "@/components/ui/input-group";
-import { useNavigate } from "react-router";
 import { Lock, Mail } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 function Login() {
     const { login } = useAuth();
-    const navigate = useNavigate();
     const [loginData, setLoginData] = useState({
         email: "",
         password: "",
@@ -30,9 +29,12 @@ function Login() {
         e.preventDefault();
         try {
             await login(loginData);
-            navigate("/");
+            toast.success("Logged in successfully!");
         } catch (error) {
             console.error("Login failed:", error);
+            toast.error(
+                "Login failed. Please check your credentials and try again."
+            );
         }
     };
     return (

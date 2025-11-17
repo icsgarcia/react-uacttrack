@@ -7,6 +7,16 @@ import useSchoolActivities, {
     type SchoolActivity,
 } from "@/hooks/useSchoolActivities";
 import type { EventClickArg } from "@fullcalendar/core/index.js";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface Events {
     title: string;
@@ -19,34 +29,14 @@ interface Events {
         venue?: string;
     };
 }
-const Modal = ({
-    onClose,
-    children,
-}: {
-    onClose: () => void;
-    children: React.ReactNode;
-}) => (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-        <div className="bg-white p-4 rounded shadow-lg w-96">
-            {children}
-            <button
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={onClose}
-            >
-                Close
-            </button>
-        </div>
-    </div>
-);
 
 function Calendar() {
-    const [events, setEvents] = useState<Events[]>([]);
-    const [selectedActivity, setSelectedActivity] = useState<Events | null>(
-        null
-    );
-
     const { data: holidays } = useHolidays();
     const { data: schoolActivities } = useSchoolActivities();
+
+    const [events, setEvents] = useState<Events[]>([]);
+    const [selectedEvent, setSelectedEvent] = useState<Events | null>(null);
+    const [openDialog, setOpenDialog] = useState<boolean>(false);
 
     useEffect(() => {
         const mergedEvents: Events[] = [];
@@ -55,6 +45,7 @@ function Calendar() {
             const mappedHolidays = holidays.map((holiday: Holiday) => ({
                 title: holiday.name,
                 start: holiday.date,
+                end: holiday.date,
                 allDay: true,
                 color: "green",
             }));
@@ -91,7 +82,7 @@ function Calendar() {
 
         // Only allow clicks for school activities (optional)
         if (extendedProps) {
-            setSelectedActivity({
+            setSelectedEvent({
                 title,
                 start: start?.toISOString() || "",
                 end: end?.toISOString() || "",
@@ -100,45 +91,99 @@ function Calendar() {
                     venue: string;
                 },
             });
+            setOpenDialog(true);
         }
     };
 
     return (
         <>
-            <FullCalendar
-                initialView="dayGridMonth"
-                plugins={[dayGridPlugin]}
-                events={events}
-                eventClick={handleEventClick}
-            />
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <FullCalendar
+                    initialView="dayGridMonth"
+                    plugins={[dayGridPlugin]}
+                    events={events}
+                    eventClick={handleEventClick}
+                />
 
-            {selectedActivity && (
-                <Modal onClose={() => setSelectedActivity(null)}>
-                    <h2 className="text-xl font-bold">
-                        {selectedActivity.title}
-                    </h2>
-                    <p>
-                        <strong>Organization:</strong>{" "}
-                        {selectedActivity.extendedProps?.organization || "-"}
-                    </p>
-                    <p>
-                        <strong>Venue:</strong>{" "}
-                        {selectedActivity.extendedProps?.venue || "-"}
-                    </p>
-                    <p>
-                        <strong>Start:</strong>{" "}
-                        {selectedActivity.start
-                            ? new Date(selectedActivity.start).toLocaleString()
-                            : "-"}
-                    </p>
-                    <p>
-                        <strong>End:</strong>{" "}
-                        {selectedActivity.end
-                            ? new Date(selectedActivity.end).toLocaleString()
-                            : "-"}
-                    </p>
-                </Modal>
-            )}
+                {selectedEvent && (
+                    <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl font-semibold">
+                                Activity Details
+                            </DialogTitle>
+                            <DialogDescription className="text-base">
+                                Below is the complete information about the
+                                selected activity.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="mt-4 space-y-6">
+                            <div>
+                                <h3 className="text-lg font-bold text-blue-700">
+                                    {selectedEvent.title}
+                                </h3>
+                            </div>
+
+                            <hr className="border-gray-300" />
+
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">
+                                        Organization
+                                    </p>
+                                    <p className="text-base">
+                                        {selectedEvent.extendedProps
+                                            ?.organization || "N/A"}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">
+                                        Venue
+                                    </p>
+                                    <p className="text-base">
+                                        {selectedEvent.extendedProps?.venue ||
+                                            "N/A"}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">
+                                        Start Date & Time
+                                    </p>
+                                    <p className="text-base">
+                                        {new Date(
+                                            selectedEvent.start
+                                        ).toLocaleString()}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">
+                                        End Date & Time
+                                    </p>
+                                    <p className="text-base">
+                                        {selectedEvent.end
+                                            ? new Date(
+                                                  selectedEvent.end
+                                              ).toLocaleString()
+                                            : "N/A"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <hr className="border-gray-300" />
+                        </div>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition">
+                                    Close
+                                </Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </DialogContent>
+                )}
+            </Dialog>
         </>
     );
 }

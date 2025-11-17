@@ -21,6 +21,8 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { uploadFilesAndCreateAPF } from "@/utils/S3Upload";
 import useVenues from "@/hooks/useVenues";
+import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 interface FormData {
     title: string;
@@ -63,6 +65,7 @@ const optionalForms = [
 
 function CreateAPF() {
     const { data: venues } = useVenues();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState<FormData>({
         title: "",
         purpose: "",
@@ -80,23 +83,34 @@ function CreateAPF() {
         venueId: "",
     });
 
-    // const submitAPF = async (formData: FormData) => {
-    //     const files = [
-    //         {name: "cashForm", file: formData.cashForm},
-    //         {name: "foodForm", file: formData.foodForm},
-    //         {name: "supplyForm", file: formData.supplyForm},
-    //         {name: "reproductionForm", file: formData.reproductionForm},
-    //         {name: "otherForm", file: formData.otherForm},
-    //     ]
-    // }
+    const recommendVenue = (attendees: number) => {
+        if (attendees <= 0) {
+            toast.error(
+                "Please enter the number of attendees first. Attendees must be greater than zero."
+            );
+            return;
+        }
+
+        const recommended = venues?.find((v) => attendees <= v.capacity);
+
+        if (recommended) {
+            toast.info(`Recommended Venue: ${recommended.name}`);
+            setFormData((prev) => ({ ...prev, venueId: recommended._id }));
+        } else {
+            toast.error("No available venue for this capacity.");
+        }
+    };
 
     const mutation = useMutation({
         mutationFn: () => uploadFilesAndCreateAPF(formData),
         onSuccess: () => {
-            alert("Activity Proposal Form created successfully!");
+            toast.success("Activity Proposal created successfully.");
+            navigate("/pending-apf");
         },
         onError: () => {
-            alert("Error creating Activity Proposal Form.");
+            toast.error(
+                "Failed to create Activity Proposal. Please try again."
+            );
         },
     });
 
@@ -116,10 +130,35 @@ function CreateAPF() {
         >
     ) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: name === "attendees" ? Number(value) : value,
+        }));
     };
+
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (
+            !formData.title ||
+            !formData.purpose ||
+            !formData.participants ||
+            !formData.attendees ||
+            !formData.requirements ||
+            !formData.date ||
+            !formData.startTime ||
+            !formData.endTime ||
+            !formData.venueId
+        ) {
+            toast.error("Please fill in all required fields.");
+            return;
+        }
+
+        if (formData.startTime >= formData.endTime) {
+            toast.error("End time must be later than start time.");
+            return;
+        }
+
         mutation.mutate();
     };
     return (
@@ -127,8 +166,8 @@ function CreateAPF() {
             <div className="p-4">
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                        {optionalForms.map((form, index) => (
-                            <Card key={index} className="mb-4">
+                        {optionalForms.map((form) => (
+                            <Card key={form.title} className="mb-4">
                                 <CardHeader>
                                     <CardTitle>{form.title}</CardTitle>
                                     <CardDescription>
@@ -140,6 +179,7 @@ function CreateAPF() {
                                         type="file"
                                         name={form.name}
                                         id={form.title}
+                                        accept=".doc,.docx,.xls,.xlsx,.pdf"
                                         onChange={(e) => handleFileChange(e)}
                                     />
                                 </CardContent>
@@ -196,7 +236,12 @@ function CreateAPF() {
                                 onChange={handleChange}
                             />
                         </div>
-                        <Button className="block mx-auto">
+                        <Button
+                            type="button"
+                            onClick={() => recommendVenue(formData.attendees)}
+                            disabled={!venues || venues.length === 0}
+                            className="block mx-auto"
+                        >
                             Recommend a venue
                         </Button>
                         <div>
@@ -204,7 +249,6 @@ function CreateAPF() {
                                 Venue
                             </Label>
                             <Select
-                                name="venueId"
                                 value={formData.venueId}
                                 onValueChange={(value) =>
                                     setFormData({ ...formData, venueId: value })
@@ -220,7 +264,10 @@ function CreateAPF() {
                                                 key={venue._id}
                                                 value={venue._id}
                                             >
-                                                {venue.name}
+                                                {venue.name}{" "}
+                                                <i>
+                                                    (Capacity: {venue.capacity})
+                                                </i>
                                             </SelectItem>
                                         ))}
                                 </SelectContent>

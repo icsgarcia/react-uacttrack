@@ -7,28 +7,38 @@ import {
 } from "@/components/ui/card";
 import UserProfile from "@/components/UserProfile";
 import Layout from "@/layouts/Layout";
+import { toast } from "sonner";
+
+const externalLinks = [
+    {
+        title: "University of the Assumption",
+        desc: "Official Website of the University of the Assumption",
+        image: "/logos/ua-logo.png",
+        url: "https://web.ua.edu.ph/",
+    },
+    {
+        title: "University of the Assumption - SERP",
+        desc: "Official Website of the University of the Assumption - SERP",
+        image: "/logos/ua-logo.png",
+        url: "https://serp.ua.edu.ph/serp/Gate/UASFP.Login.aspx",
+    },
+    {
+        title: "RSOinTrack",
+        desc: "Official Website of RSOinTrack",
+        image: "/logos/RSOinTrack-logo.png",
+        url: "#",
+    },
+];
 
 function ExternalLinks() {
-    const externalLinks = [
-        {
-            title: "University of the Assumption",
-            desc: "Official Website of the University of the Assumption",
-            image: "/logos/ua-logo.png",
-            url: "https://web.ua.edu.ph/",
-        },
-        {
-            title: "University of the Assumption - SERP",
-            desc: "Official Website of the University of the Assumption - SERP",
-            image: "/logos/ua-logo.png",
-            url: "https://serp.ua.edu.ph/serp/Gate/UASFP.Login.aspx",
-        },
-        {
-            title: "RSOinTrack",
-            desc: "Official Website of RSOinTrack",
-            image: "/logos/RSOinTrack-logo.png",
-            url: "#",
-        },
-    ];
+    const handleClick = (title: string, link: string) => {
+        if (link === "#") {
+            toast.error("This link is currently unavailable.");
+            return;
+        }
+        toast.info(`Opening ${title}...`);
+        window.open(link, "_blank", "noopener,noreferrer");
+    };
     return (
         <Layout>
             <div className="p-4">
@@ -37,14 +47,23 @@ function ExternalLinks() {
                     External Links
                 </h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {externalLinks.map((elink) => (
-                        <a
-                            href={elink.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            key={elink.title}
-                        >
-                            <Card>
+                    {externalLinks.map((elink, index) => {
+                        const disabled = elink.url === "#";
+                        return (
+                            <Card
+                                key={index}
+                                role="button"
+                                onClick={() =>
+                                    !disabled &&
+                                    handleClick(elink.title, elink.url)
+                                }
+                                tabIndex={disabled ? -1 : 0}
+                                className={`cursor-pointer transition hover:shadow-lg ${
+                                    disabled
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-gray-50"
+                                }`}
+                            >
                                 <CardHeader className="text-center">
                                     <CardTitle>{elink.title}</CardTitle>
                                     <CardDescription>
@@ -59,8 +78,8 @@ function ExternalLinks() {
                                     />
                                 </CardContent>
                             </Card>
-                        </a>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </Layout>

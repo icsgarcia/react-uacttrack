@@ -3,7 +3,7 @@ import Venue from "../models/venueModel";
 
 export const getVenues = async (req: Request, res: Response) => {
     try {
-        const venues = await Venue.find();
+        const venues = await Venue.find().sort({ capacity: 1 });
 
         res.status(200).json(venues);
     } catch (error) {
