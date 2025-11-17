@@ -9,6 +9,7 @@ import { Lock, Mail } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Link } from "react-router";
 
 function Login() {
     const { login } = useAuth();
@@ -98,12 +99,12 @@ function Login() {
 
                     <p className="text-center text-sm text-gray-700">
                         Don’t have an account?{" "}
-                        <a
-                            href="/register"
+                        <Link
+                            to="/register"
                             className="text-primary font-semibold hover:underline"
                         >
                             Register
-                        </a>
+                        </Link>
                     </p>
                 </form>
             </div>

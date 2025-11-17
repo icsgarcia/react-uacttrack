@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import useAuth from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { Link } from "react-router";
 
 interface Organization {
     _id: string;
@@ -183,12 +184,12 @@ function Register() {
 
                     <p className="text-center text-sm text-gray-700">
                         Already have an account?{" "}
-                        <a
-                            href="/login"
+                        <Link
+                            to="/login"
                             className="text-primary font-semibold hover:underline"
                         >
                             Login
-                        </a>
+                        </Link>
                     </p>
                 </form>
             </div>
