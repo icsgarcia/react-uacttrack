@@ -175,20 +175,21 @@ function APF() {
 
     return (
         <Layout>
-            <div className="max-w-6xl mx-auto p-6 space-y-6">
-                {/* Header Section */}
-                <Card>
+            <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+                {/* HEADER */}
+                <Card className="rounded-xl border-l-4 border-blue-800 shadow-sm">
                     <CardHeader className="space-y-4">
-                        <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                                <CardTitle className="text-3xl font-bold text-blue-800">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                            <div className="space-y-1">
+                                <CardTitle className="text-3xl font-bold text-blue-900">
                                     {data.title}
                                 </CardTitle>
-                                <CardDescription className="text-base">
+                                <CardDescription className="text-base text-gray-600">
                                     Activity Approval Form for In-Campus
                                     Activities
                                 </CardDescription>
                             </div>
+
                             <Badge
                                 className={`${getStatusColor(
                                     data.status
@@ -197,6 +198,7 @@ function APF() {
                                 {data.status}
                             </Badge>
                         </div>
+
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                             <span className="font-semibold">Control No:</span>
                             <span className="font-mono bg-gray-100 px-3 py-1 rounded">
@@ -206,33 +208,36 @@ function APF() {
                     </CardHeader>
                 </Card>
 
-                {/* Basic Information */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">
+                {/* BASIC INFORMATION */}
+                <Card className="rounded-xl border shadow-sm">
+                    <CardHeader className="border-b bg-gray-50">
+                        <CardTitle className="text-xl font-semibold text-gray-800">
                             Basic Information
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid md:grid-cols-2 gap-6">
+
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                        {/* Organization */}
                         <div className="flex items-start gap-3">
-                            <Building2 className="w-5 h-5 text-blue-600 mt-1" />
+                            <Building2 className="w-6 h-6 text-blue-700 mt-1" />
                             <div>
-                                <p className="text-sm font-semibold text-gray-600">
-                                    Department/Office
+                                <p className="text-sm font-medium text-gray-500">
+                                    Department / Office
                                 </p>
-                                <p className="text-base font-medium">
+                                <p className="text-base font-semibold text-gray-800">
                                     {data.organizationId.name}
                                 </p>
                             </div>
                         </div>
 
+                        {/* Prepared By */}
                         <div className="flex items-start gap-3">
-                            <User className="w-5 h-5 text-blue-600 mt-1" />
+                            <User className="w-6 h-6 text-blue-700 mt-1" />
                             <div>
-                                <p className="text-sm font-semibold text-gray-600">
+                                <p className="text-sm font-medium text-gray-500">
                                     Prepared By
                                 </p>
-                                <p className="text-base font-medium">
+                                <p className="text-base font-semibold text-gray-800">
                                     {data.userId.firstName}{" "}
                                     {data.userId.lastName}
                                 </p>
@@ -241,22 +246,24 @@ function APF() {
                     </CardContent>
                 </Card>
 
-                {/* Activity Details */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">
+                {/* ACTIVITY DETAILS */}
+                <Card className="rounded-xl border shadow-sm">
+                    <CardHeader className="border-b bg-gray-50">
+                        <CardTitle className="text-xl font-semibold text-gray-800">
                             Activity Details
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid md:grid-cols-2 gap-6">
+
+                    <CardContent className="p-6 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Date */}
                             <div className="flex items-start gap-3">
-                                <Calendar className="w-5 h-5 text-blue-600 mt-1" />
+                                <Calendar className="w-6 h-6 text-blue-700 mt-1" />
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-600">
+                                    <p className="text-sm font-medium text-gray-500">
                                         Date
                                     </p>
-                                    <p className="text-base font-medium">
+                                    <p className="text-base font-semibold">
                                         {new Date(data.date).toLocaleDateString(
                                             "en-US",
                                             {
@@ -270,37 +277,40 @@ function APF() {
                                 </div>
                             </div>
 
+                            {/* Time */}
                             <div className="flex items-start gap-3">
-                                <Clock className="w-5 h-5 text-blue-600 mt-1" />
+                                <Clock className="w-6 h-6 text-blue-700 mt-1" />
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-600">
+                                    <p className="text-sm font-medium text-gray-500">
                                         Time
                                     </p>
-                                    <p className="text-base font-medium">
-                                        {data.startTime} - {data.endTime}
+                                    <p className="text-base font-semibold">
+                                        {data.startTime} – {data.endTime}
                                     </p>
                                 </div>
                             </div>
 
+                            {/* Venue */}
                             <div className="flex items-start gap-3">
-                                <MapPin className="w-5 h-5 text-blue-600 mt-1" />
+                                <MapPin className="w-6 h-6 text-blue-700 mt-1" />
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-600">
+                                    <p className="text-sm font-medium text-gray-500">
                                         Venue
                                     </p>
-                                    <p className="text-base font-medium">
+                                    <p className="text-base font-semibold">
                                         {data.venueId.name}
                                     </p>
                                 </div>
                             </div>
 
+                            {/* Attendees */}
                             <div className="flex items-start gap-3">
-                                <Users className="w-5 h-5 text-blue-600 mt-1" />
+                                <Users className="w-6 h-6 text-blue-700 mt-1" />
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-600">
+                                    <p className="text-sm font-medium text-gray-500">
                                         Expected Attendees
                                     </p>
-                                    <p className="text-base font-medium">
+                                    <p className="text-base font-semibold">
                                         {data.attendees} people
                                     </p>
                                 </div>
@@ -309,37 +319,40 @@ function APF() {
 
                         <Separator />
 
+                        {/* Participants */}
                         <div className="flex items-start gap-3">
-                            <Users className="w-5 h-5 text-blue-600 mt-1" />
-                            <div className="flex-1">
-                                <p className="text-sm font-semibold text-gray-600 mb-2">
+                            <Users className="w-6 h-6 text-blue-700 mt-1" />
+                            <div>
+                                <p className="text-sm font-medium text-gray-500 mb-1">
                                     Participants (Department/Program/Year Level)
                                 </p>
-                                <p className="text-base text-gray-700 leading-relaxed">
+                                <p className="text-gray-700 leading-relaxed">
                                     {data.participants}
                                 </p>
                             </div>
                         </div>
 
+                        {/* Purpose */}
                         <div className="flex items-start gap-3">
-                            <Target className="w-5 h-5 text-blue-600 mt-1" />
-                            <div className="flex-1">
-                                <p className="text-sm font-semibold text-gray-600 mb-2">
-                                    Purpose/Objective
+                            <Target className="w-6 h-6 text-blue-700 mt-1" />
+                            <div>
+                                <p className="text-sm font-medium text-gray-500 mb-1">
+                                    Purpose / Objective
                                 </p>
-                                <p className="text-base text-gray-700 leading-relaxed">
+                                <p className="text-gray-700 leading-relaxed">
                                     {data.purpose}
                                 </p>
                             </div>
                         </div>
 
+                        {/* Requirements */}
                         <div className="flex items-start gap-3">
-                            <FileText className="w-5 h-5 text-blue-600 mt-1" />
-                            <div className="flex-1">
-                                <p className="text-sm font-semibold text-gray-600 mb-2">
-                                    Requirements/Resources Needed
+                            <FileText className="w-6 h-6 text-blue-700 mt-1" />
+                            <div>
+                                <p className="text-sm font-medium text-gray-500 mb-1">
+                                    Requirements / Resources Needed
                                 </p>
-                                <p className="text-base text-gray-700 leading-relaxed">
+                                <p className="text-gray-700 leading-relaxed">
                                     {data.requirements}
                                 </p>
                             </div>
@@ -347,36 +360,38 @@ function APF() {
                     </CardContent>
                 </Card>
 
-                {/* Projected Funding Needs */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">
+                {/* PROJECTED FUNDING NEEDS */}
+                <Card className="rounded-xl border shadow-sm">
+                    <CardHeader className="border-b bg-gray-50">
+                        <CardTitle className="text-xl font-semibold text-gray-800">
                             Projected Funding Needs
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-50">
-                                        <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">
+
+                    <CardContent className="p-6">
+                        <div className="overflow-hidden border border-gray-200 rounded-lg">
+                            <table className="w-full">
+                                <thead className="bg-gray-100">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">
                                             Nature
                                         </th>
-                                        <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-700">
+                                        <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b">
                                             Form Attached
                                         </th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     {fileItems.map((item) => (
                                         <tr
                                             key={item.key}
-                                            className="hover:bg-gray-50"
+                                            className="even:bg-gray-50 hover:bg-gray-100 transition"
                                         >
-                                            <td className="border border-gray-300 px-4 py-3">
+                                            <td className="px-4 py-3 text-sm border-b text-gray-800">
                                                 {item.label}
                                             </td>
-                                            <td className="border border-gray-300 px-4 py-3 text-center">
+                                            <td className="px-4 py-3 border-b text-center">
                                                 {data.files &&
                                                 data.files[item.url] ? (
                                                     <a
@@ -384,12 +399,10 @@ function APF() {
                                                             data.files[item.url]
                                                         }
                                                         target="_blank"
+                                                        className="text-blue-700 underline"
                                                         rel="noopener noreferrer"
-                                                        download={
-                                                            data.files[item.url]
-                                                        }
                                                     >
-                                                        {item.label} File
+                                                        View File
                                                     </a>
                                                 ) : (
                                                     <span className="text-gray-400">
@@ -405,15 +418,16 @@ function APF() {
                     </CardContent>
                 </Card>
 
-                {/* Approval Section */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">
+                {/* APPROVAL SECTION */}
+                <Card className="rounded-xl border shadow-sm">
+                    <CardHeader className="border-b bg-gray-50">
+                        <CardTitle className="text-xl font-semibold text-gray-800">
                             Endorsements & Approvals
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                    <CardContent className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {[
                                 {
                                     title: "Head of Organization",
@@ -424,25 +438,25 @@ function APF() {
                                     status: data.osaStatus,
                                 },
                                 {
-                                    title: "Vice President for Administration",
+                                    title: "VP for Administration",
                                     status: data.vpaStatus,
                                 },
                                 {
-                                    title: "Vice President for Academic Affairs",
+                                    title: "VP for Academic Affairs",
                                     status: data.vpaaStatus,
                                 },
-                            ].map((approval, index) => (
+                            ].map((approval, idx) => (
                                 <div
-                                    key={index}
-                                    className="p-4 border rounded-lg bg-gray-50"
+                                    key={idx}
+                                    className="p-4 bg-white border rounded-xl shadow-sm"
                                 >
-                                    <p className="text-sm font-semibold text-gray-600 mb-2">
+                                    <p className="text-sm font-medium text-gray-600">
                                         {approval.title}
                                     </p>
                                     <Badge
                                         className={`${getStatusColor(
                                             approval.status
-                                        )} text-white`}
+                                        )} text-white mt-2`}
                                     >
                                         {approval.status}
                                     </Badge>
@@ -452,31 +466,40 @@ function APF() {
                     </CardContent>
                 </Card>
 
-                {/* Timestamps */}
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="flex justify-between text-sm text-gray-600">
-                            <div>
-                                <span className="font-semibold">Created:</span>{" "}
-                                {new Date(data.createdAt).toLocaleString()}
-                            </div>
-                            <div>
-                                <span className="font-semibold">
-                                    Last Updated:
-                                </span>{" "}
-                                {new Date(data.updatedAt).toLocaleString()}
-                            </div>
+                {/* TIMESTAMPS */}
+                <Card className="rounded-xl border shadow-sm">
+                    <CardContent className="flex flex-col sm:flex-row sm:justify-between p-6 text-sm text-gray-600 gap-2">
+                        <div>
+                            <span className="font-semibold">Created: </span>
+                            {new Date(data.createdAt).toLocaleString()}
+                        </div>
+                        <div>
+                            <span className="font-semibold">
+                                Last Updated:{" "}
+                            </span>
+                            {new Date(data.updatedAt).toLocaleString()}
                         </div>
                     </CardContent>
                 </Card>
 
+                {/* ACTION BUTTONS */}
                 {showActionButtons && (
-                    <Card>
-                        <CardContent className="flex justify-center items-center gap-8">
-                            <Button onClick={handleReject}>Reject</Button>
-                            <Button onClick={handleApprove}>Approve</Button>
-                        </CardContent>
-                    </Card>
+                    <div className="flex justify-center gap-4 py-4">
+                        <Button
+                            onClick={handleReject}
+                            variant="destructive"
+                            className="px-10 py-2 text-lg rounded-lg"
+                        >
+                            Reject
+                        </Button>
+
+                        <Button
+                            onClick={handleApprove}
+                            className="px-10 py-2 text-lg rounded-lg bg-green-700 hover:bg-green-600 text-white"
+                        >
+                            Approve
+                        </Button>
+                    </div>
                 )}
             </div>
         </Layout>

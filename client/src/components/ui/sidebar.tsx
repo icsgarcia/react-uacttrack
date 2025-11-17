@@ -275,33 +275,37 @@ function SidebarTrigger({
     const { toggleSidebar } = useSidebar();
 
     return (
-        <div className="relative py-4">
+        <header className="relative py-4 bg-white shadow-sm">
             <Button
                 data-sidebar="trigger"
                 data-slot="sidebar-trigger"
                 variant="ghost"
                 size="icon"
-                className={cn("size-7", className)}
+                className={cn(
+                    "size-7 absolute left-4 top-1/2 -translate-y-1/2 hover:bg-gray-100 transition",
+                    className
+                )}
                 onClick={(event) => {
                     onClick?.(event);
                     toggleSidebar();
                 }}
                 {...props}
             >
-                <PanelLeftIcon />
+                <PanelLeftIcon className="w-5 h-5 text-gray-700" />
                 <span className="sr-only">Toggle Sidebar</span>
             </Button>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center gap-4">
+
+            <div className="flex justify-center items-center gap-4">
                 <img
-                    src="logos/ua-logo.png"
+                    src="/logos/ua-logo.png"
                     alt="ua-logo"
-                    className="size-12 block md:inline"
+                    className="w-12 h-12 object-contain"
                 />
-                <p className="uppercase font-semibold text-blue-900">
+                <h1 className="uppercase text-blue-900 font-bold text-lg md:text-xl">
                     University of the Assumption
-                </p>
+                </h1>
             </div>
-        </div>
+        </header>
     );
 }
 
