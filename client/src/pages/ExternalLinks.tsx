@@ -39,42 +39,50 @@ function ExternalLinks() {
         toast.info(`Opening ${title}...`);
         window.open(link, "_blank", "noopener,noreferrer");
     };
+
     return (
         <Layout>
             <div className="p-4">
                 <UserProfile />
-                <h1 className="text-3xl text-center text-blue-800 font-semibold mb-8">
+
+                <h1 className="text-3xl text-center text-blue-800 font-semibold mb-10">
                     External Links
                 </h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {externalLinks.map((elink, index) => {
                         const disabled = elink.url === "#";
+
                         return (
                             <Card
                                 key={index}
-                                role="button"
+                                role={disabled ? "presentation" : "button"}
                                 onClick={() =>
                                     !disabled &&
                                     handleClick(elink.title, elink.url)
                                 }
-                                tabIndex={disabled ? -1 : 0}
-                                className={`cursor-pointer transition hover:shadow-lg ${
-                                    disabled
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : "hover:bg-gray-50"
-                                }`}
+                                className={`transition-all rounded-xl shadow-sm border 
+                                    ${
+                                        disabled
+                                            ? "opacity-40 cursor-not-allowed"
+                                            : "cursor-pointer hover:shadow-lg hover:border-blue-600"
+                                    }
+                                `}
                             >
-                                <CardHeader className="text-center">
-                                    <CardTitle>{elink.title}</CardTitle>
+                                <CardHeader className="text-center space-y-1">
+                                    <CardTitle className="text-blue-900">
+                                        {elink.title}
+                                    </CardTitle>
                                     <CardDescription>
                                         {elink.desc}
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent>
+
+                                <CardContent className="flex justify-center py-4">
                                     <img
                                         src={elink.image}
                                         alt={elink.title}
-                                        className="size-64 mx-auto"
+                                        className="w-40 h-40 object-contain"
                                     />
                                 </CardContent>
                             </Card>

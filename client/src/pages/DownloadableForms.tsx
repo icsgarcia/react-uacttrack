@@ -50,6 +50,7 @@ function DownloadableForms() {
         }
 
         toast.success(`Downloading ${name}...`);
+
         const downloadLink = document.createElement("a");
         downloadLink.href = link;
         downloadLink.download = "";
@@ -57,39 +58,65 @@ function DownloadableForms() {
         downloadLink.click();
         document.body.removeChild(downloadLink);
     };
+
     return (
         <Layout>
             <div className="p-4">
                 <UserProfile />
-                <h1 className="text-3xl text-center text-blue-800 font-semibold mb-8">
+
+                <h1 className="text-3xl text-center text-blue-800 font-semibold mb-10">
                     Downloadable Forms
                 </h1>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Forms</TableHead>
-                            <TableHead>Download</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {downloadableForms.map((form) => (
-                            <TableRow key={form.title}>
-                                <TableCell>{form.title}</TableCell>
-                                <TableCell>
-                                    <Button
-                                        onClick={() =>
-                                            handleClick(form.title, form.link)
-                                        }
-                                        disabled={form.link === "#"}
-                                        className="bg-blue-600 hover:bg-blue-700"
-                                    >
-                                        Download {form.title}
-                                    </Button>
-                                </TableCell>
+
+                <div className="rounded-lg border shadow-sm overflow-x-auto">
+                    <Table>
+                        <TableHeader className="bg-blue-50">
+                            <TableRow className="hover:bg-transparent">
+                                <TableHead className="font-semibold text-blue-900">
+                                    Form Name
+                                </TableHead>
+                                <TableHead className="font-semibold text-blue-900">
+                                    Action
+                                </TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+
+                        <TableBody>
+                            {downloadableForms.map((form) => {
+                                const disabled = form.link === "#";
+
+                                return (
+                                    <TableRow key={form.title}>
+                                        <TableCell className="py-4 font-medium">
+                                            {form.title}
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <Button
+                                                onClick={() =>
+                                                    handleClick(
+                                                        form.title,
+                                                        form.link
+                                                    )
+                                                }
+                                                disabled={disabled}
+                                                className={`w-full sm:w-auto 
+                                                    ${
+                                                        disabled
+                                                            ? "opacity-50 cursor-not-allowed"
+                                                            : "bg-blue-600 hover:bg-blue-700"
+                                                    }
+                                                `}
+                                            >
+                                                Download
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
         </Layout>
     );

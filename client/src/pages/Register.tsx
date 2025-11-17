@@ -59,10 +59,12 @@ function Register() {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         if (registerForm.password !== registerForm.confirmPassword) {
             toast.error("Passwords do not match.");
             return;
         }
+
         try {
             await register(registerForm);
             toast.success("User registered successfully!");
@@ -75,75 +77,59 @@ function Register() {
     };
 
     return (
-        <div className="relative flex min-h-screen overflow-hidden">
+        <div className="relative flex min-h-screen bg-gradient-to-br from-primary to-blue-900">
             <img
                 src="/logos/ua-logo.png"
                 alt="ua-logo"
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[500px] lg:top-auto lg:left-auto lg:translate-x-0 lg:translate-y-0 lg:bottom-0 lg:right-0 lg:w-[800px] lg:rotate-45 opacity-30 grayscale"
+                className="absolute opacity-10 grayscale w-[300px] md:w-[500px] lg:w-[750px]
+        top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             />
-            <div className="w-full lg:w-1/2 flex items-center justify-center z-50">
+
+            <div className="relative w-full flex items-center justify-center px-4 z-10">
                 <form
                     onSubmit={handleSubmit}
-                    className="border rounded-md w-full max-w-md px-4 py-8 bg-blue-800"
+                    className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6"
                 >
-                    <h1 className="text-3xl font-semibold text-center mb-4 text-white">
+                    <h1 className="text-3xl font-bold text-center text-primary">
                         Register
                     </h1>
-                    <div className="mb-4">
-                        <Label
-                            htmlFor="firstName"
-                            className="block mb-1 text-white"
-                        >
-                            First Name
-                        </Label>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="firstName">First Name</Label>
                         <Input
                             type="text"
                             id="firstName"
                             name="firstName"
                             onChange={handleChange}
-                            className="border p-2 w-full text-white"
+                            className="focus-visible:ring-primary"
                         />
                     </div>
-                    <div className="mb-4">
-                        <Label
-                            htmlFor="lastName"
-                            className="block mb-1 text-white"
-                        >
-                            Last Name
-                        </Label>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="lastName">Last Name</Label>
                         <Input
                             type="text"
                             id="lastName"
                             name="lastName"
                             onChange={handleChange}
-                            className="border p-2 w-full text-white"
+                            className="focus-visible:ring-primary"
                         />
                     </div>
-                    <div className="mb-4">
-                        <Label
-                            htmlFor="email"
-                            className="block mb-1 text-white"
-                        >
-                            Email
-                        </Label>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="email">Email</Label>
                         <Input
                             type="text"
                             id="email"
                             name="email"
                             onChange={handleChange}
-                            className="border p-2 w-full text-white"
+                            className="focus-visible:ring-primary"
                         />
                     </div>
-                    <div className="mb-4">
-                        <Label
-                            htmlFor="department"
-                            className="block mb-1 text-white"
-                        >
-                            Department
-                        </Label>
 
+                    <div className="space-y-1">
+                        <Label>Department</Label>
                         <Select
-                            name="department"
                             onValueChange={(value) =>
                                 setRegisterForm((prev) => ({
                                     ...prev,
@@ -151,11 +137,8 @@ function Register() {
                                 }))
                             }
                         >
-                            <SelectTrigger className="w-full border p-2 text-white">
-                                <SelectValue
-                                    placeholder="Department"
-                                    className="text-white placeholder:text-white"
-                                />
+                            <SelectTrigger className="focus-visible:ring-primary">
+                                <SelectValue placeholder="Select department" />
                             </SelectTrigger>
                             <SelectContent>
                                 {organizations.map((org) => (
@@ -169,26 +152,20 @@ function Register() {
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="mb-4">
-                        <Label
-                            htmlFor="password"
-                            className="block mb-1 text-white"
-                        >
-                            Password
-                        </Label>
+
+                    <div className="space-y-1">
+                        <Label htmlFor="password">Password</Label>
                         <Input
                             type="password"
                             id="password"
                             name="password"
                             onChange={handleChange}
-                            className="border p-2 w-full text-white"
+                            className="focus-visible:ring-primary"
                         />
                     </div>
-                    <div className="mb-4">
-                        <Label
-                            htmlFor="confirmPassword"
-                            className="block mb-1 text-white"
-                        >
+
+                    <div className="space-y-1">
+                        <Label htmlFor="confirmPassword">
                             Confirm Password
                         </Label>
                         <Input
@@ -196,26 +173,25 @@ function Register() {
                             id="confirmPassword"
                             name="confirmPassword"
                             onChange={handleChange}
-                            className="border p-2 w-full text-white"
+                            className="focus-visible:ring-primary"
                         />
                     </div>
-                    <Button className="mb-4 border rounded p-2 w-full text-white">
+
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-white py-2 text-lg rounded-lg">
                         Register
                     </Button>
-                    <div>
-                        <p className="text-sm text-white text-center">
-                            Already have an account?{" "}
-                            <a
-                                href="/login"
-                                className="text-blue-200 hover:underline"
-                            >
-                                Login
-                            </a>
-                        </p>
-                    </div>
+
+                    <p className="text-center text-sm text-gray-700">
+                        Already have an account?{" "}
+                        <a
+                            href="/login"
+                            className="text-primary font-semibold hover:underline"
+                        >
+                            Login
+                        </a>
+                    </p>
                 </form>
             </div>
-            <div className="w-1/2 hidden lg:block"></div>
         </div>
     );
 }

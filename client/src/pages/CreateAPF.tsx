@@ -46,14 +46,14 @@ const optionalForms = [
         title: "Check Payment / Cash",
         name: "cashForm",
         description:
-            "Funding Request Form (FRF) for P1,000 and above. Petty Cash Form (PCF) for aggregate amount below P1,000.",
+            "Funding Request Form (FRF) for P1,000 and above. Petty Cash Form (PCF) for below P1,000.",
     },
     { title: "Food", name: "foodForm", description: "Request for Meals (RFM)" },
     {
         title: "Supplies",
         name: "supplyForm",
         description:
-            "Requisition Form (RF) for supplies available at RMS. Purchase Requisition (PR) for supplies to be purchased.",
+            "Requisition Form (RF) or Purchase Requisition Form (PRF).",
     },
     {
         title: "Reproduction",
@@ -85,9 +85,7 @@ function CreateAPF() {
 
     const recommendVenue = (attendees: number) => {
         if (attendees <= 0) {
-            toast.error(
-                "Please enter the number of attendees first. Attendees must be greater than zero."
-            );
+            toast.error("Enter attendees first. Must be greater than zero.");
             return;
         }
 
@@ -97,7 +95,7 @@ function CreateAPF() {
             toast.info(`Recommended Venue: ${recommended.name}`);
             setFormData((prev) => ({ ...prev, venueId: recommended._id }));
         } else {
-            toast.error("No available venue for this capacity.");
+            toast.error("No venue fits this capacity.");
         }
     };
 
@@ -108,9 +106,7 @@ function CreateAPF() {
             navigate("/pending-apf");
         },
         onError: () => {
-            toast.error(
-                "Failed to create Activity Proposal. Please try again."
-            );
+            toast.error("Failed to create APF. Please try again.");
         },
     });
 
@@ -161,15 +157,23 @@ function CreateAPF() {
 
         mutation.mutate();
     };
+
     return (
         <Layout>
             <div className="p-4">
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    {/* Optional Forms */}
+                    <h2 className="text-2xl font-semibold text-blue-800 mb-4">
+                        Optional Attachments
+                    </h2>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
                         {optionalForms.map((form) => (
-                            <Card key={form.title} className="mb-4">
+                            <Card key={form.title} className="shadow-sm">
                                 <CardHeader>
-                                    <CardTitle>{form.title}</CardTitle>
+                                    <CardTitle className="text-blue-700">
+                                        {form.title}
+                                    </CardTitle>
                                     <CardDescription>
                                         {form.description}
                                     </CardDescription>
@@ -180,149 +184,176 @@ function CreateAPF() {
                                         name={form.name}
                                         id={form.title}
                                         accept=".doc,.docx,.xls,.xlsx,.pdf"
-                                        onChange={(e) => handleFileChange(e)}
+                                        onChange={handleFileChange}
                                     />
                                 </CardContent>
                             </Card>
                         ))}
                     </div>
 
-                    <div className="mb-8">
-                        <div className="mb-4">
-                            <Label htmlFor="attendees" className="mb-1">
-                                Number of Attendees
-                            </Label>
-                            <Input
-                                type="number"
-                                name="attendees"
-                                id="attendees"
-                                value={formData.attendees}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <Label htmlFor="date" className="mb-1">
-                                Date
-                            </Label>
-                            <Input
-                                type="date"
-                                name="date"
-                                id="date"
-                                value={formData.date}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <Label htmlFor="startTime" className="mb-1">
-                                Start Time
-                            </Label>
-                            <Input
-                                type="time"
-                                name="startTime"
-                                id="startTime"
-                                value={formData.startTime}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <Label htmlFor="endTime" className="mb-1">
-                                End Time
-                            </Label>
-                            <Input
-                                type="time"
-                                name="endTime"
-                                id="endTime"
-                                value={formData.endTime}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <Button
-                            type="button"
-                            onClick={() => recommendVenue(formData.attendees)}
-                            disabled={!venues || venues.length === 0}
-                            className="block mx-auto"
-                        >
-                            Recommend a venue
-                        </Button>
-                        <div>
-                            <Label htmlFor="venue" className="mb-1">
-                                Venue
-                            </Label>
-                            <Select
-                                value={formData.venueId}
-                                onValueChange={(value) =>
-                                    setFormData({ ...formData, venueId: value })
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select a venue" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {venues &&
-                                        venues.map((venue) => (
+                    {/* Event Details */}
+                    <Card className="mb-10 shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-blue-800">
+                                Event Schedule & Venue
+                            </CardTitle>
+                        </CardHeader>
+
+                        <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div>
+                                <Label htmlFor="attendees">Attendees</Label>
+                                <Input
+                                    type="number"
+                                    name="attendees"
+                                    id="attendees"
+                                    value={formData.attendees}
+                                    onChange={handleChange}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="date">Date</Label>
+                                <Input
+                                    type="date"
+                                    name="date"
+                                    id="date"
+                                    value={formData.date}
+                                    onChange={handleChange}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="startTime">Start Time</Label>
+                                <Input
+                                    type="time"
+                                    name="startTime"
+                                    id="startTime"
+                                    value={formData.startTime}
+                                    onChange={handleChange}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="endTime">End Time</Label>
+                                <Input
+                                    type="time"
+                                    name="endTime"
+                                    id="endTime"
+                                    value={formData.endTime}
+                                    onChange={handleChange}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2 lg:col-span-1 flex flex-col gap-2">
+                                <Button
+                                    type="button"
+                                    onClick={() =>
+                                        recommendVenue(formData.attendees)
+                                    }
+                                    disabled={!venues}
+                                    className="bg-blue-700 hover:bg-blue-800 w-full"
+                                >
+                                    Recommend Venue
+                                </Button>
+
+                                <Label htmlFor="venueId">Venue</Label>
+                                <Select
+                                    value={formData.venueId}
+                                    onValueChange={(value) =>
+                                        setFormData({
+                                            ...formData,
+                                            venueId: value,
+                                        })
+                                    }
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select a venue" />
+                                    </SelectTrigger>
+
+                                    <SelectContent>
+                                        {venues?.map((venue) => (
                                             <SelectItem
                                                 key={venue._id}
                                                 value={venue._id}
                                             >
-                                                {venue.name}{" "}
-                                                <i>
-                                                    (Capacity: {venue.capacity})
-                                                </i>
+                                                {venue.name} (Capacity:{" "}
+                                                {venue.capacity})
                                             </SelectItem>
                                         ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                    <div className="mb-8">
-                        <div className="mb-4">
-                            <Label htmlFor="title" className="mb-1">
-                                Title
-                            </Label>
-                            <Input
-                                type="text"
-                                name="title"
-                                id="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <Label htmlFor="participants" className="mb-1">
-                                Participants
-                            </Label>
-                            <Textarea
-                                name="participants"
-                                id="participants"
-                                value={formData.participants}
-                                onChange={handleChange}
-                            ></Textarea>
-                        </div>
-                        <div className="mb-4">
-                            <Label htmlFor="purpose" className="mb-1">
-                                Purpose
-                            </Label>
-                            <Textarea
-                                name="purpose"
-                                id="purpose"
-                                value={formData.purpose}
-                                onChange={handleChange}
-                            ></Textarea>
-                        </div>
-                        <div>
-                            <Label htmlFor="requirements" className="mb-1">
-                                Requirements/Resources Needed
-                            </Label>
-                            <Textarea
-                                name="requirements"
-                                id="requirements"
-                                value={formData.requirements}
-                                onChange={handleChange}
-                            ></Textarea>
-                        </div>
-                    </div>
-                    <Button type="submit" className="block mx-auto mb-4">
+                    {/* Proposal Details */}
+                    <Card className="mb-10 shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-blue-800">
+                                Activity Proposal Details
+                            </CardTitle>
+                        </CardHeader>
+
+                        <CardContent className="grid gap-6">
+                            <div>
+                                <Label htmlFor="title">Title</Label>
+                                <Input
+                                    type="text"
+                                    name="title"
+                                    id="title"
+                                    value={formData.title}
+                                    onChange={handleChange}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="participants">
+                                    Participants
+                                </Label>
+                                <Textarea
+                                    name="participants"
+                                    id="participants"
+                                    value={formData.participants}
+                                    onChange={handleChange}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="purpose">Purpose</Label>
+                                <Textarea
+                                    name="purpose"
+                                    id="purpose"
+                                    value={formData.purpose}
+                                    onChange={handleChange}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="requirements">
+                                    Requirements / Resources Needed
+                                </Label>
+                                <Textarea
+                                    name="requirements"
+                                    id="requirements"
+                                    value={formData.requirements}
+                                    onChange={handleChange}
+                                    className="mt-1"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Button
+                        type="submit"
+                        className="block mx-auto bg-blue-700 hover:bg-blue-800 px-8 py-2 text-lg"
+                    >
                         Create Activity Proposal
                     </Button>
                 </form>

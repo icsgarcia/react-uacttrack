@@ -6,7 +6,7 @@ import useHolidays from "@/hooks/useHolidays";
 import useSchoolActivities, {
     type SchoolActivity,
 } from "@/hooks/useSchoolActivities";
-import type { EventClickArg } from "@fullcalendar/core/index.js";
+import type { EventClickArg } from "@fullcalendar/core";
 import {
     Dialog,
     DialogContent,
@@ -27,6 +27,7 @@ interface Events {
     extendedProps?: {
         organization?: string;
         venue?: string;
+        type?: string;
     };
 }
 
@@ -42,36 +43,35 @@ function Calendar() {
         const mergedEvents: Events[] = [];
 
         if (holidays) {
-            const mappedHolidays = holidays.map((holiday: Holiday) => ({
-                title: holiday.name,
-                start: holiday.date,
-                end: holiday.date,
-                allDay: true,
-                color: "green",
-            }));
-
-            mergedEvents.push(...mappedHolidays);
+            mergedEvents.push(
+                ...holidays.map((holiday: Holiday) => ({
+                    title: holiday.name,
+                    start: holiday.date,
+                    end: holiday.date,
+                    allDay: true,
+                    color: "#34D399",
+                    extendedProps: { type: "Holiday" },
+                }))
+            );
         }
 
         if (schoolActivities) {
-            const mappedSchoolActivities = schoolActivities.map(
-                (activity: SchoolActivity) => {
+            mergedEvents.push(
+                ...schoolActivities.map((activity: SchoolActivity) => {
                     const dateOnly = activity.date.split("T")[0];
-
                     return {
                         title: activity.title,
                         start: `${dateOnly}T${activity.startTime}`,
                         end: `${dateOnly}T${activity.endTime}`,
-                        color: "blue",
+                        color: "#3B82F6",
                         extendedProps: {
                             organization: activity.organizationId.name,
                             venue: activity.venueId.name,
+                            type: "Activity",
                         },
                     };
-                }
+                })
             );
-
-            mergedEvents.push(...mappedSchoolActivities);
         }
 
         setEvents(mergedEvents);
@@ -79,8 +79,6 @@ function Calendar() {
 
     const handleEventClick = (info: EventClickArg) => {
         const { extendedProps, title, start, end } = info.event;
-
-        // Only allow clicks for school activities (optional)
         if (extendedProps) {
             setSelectedEvent({
                 title,
@@ -89,6 +87,7 @@ function Calendar() {
                 extendedProps: extendedProps as {
                     organization: string;
                     venue: string;
+                    type: "Holiday" | "Activity";
                 },
             });
             setOpenDialog(true);
@@ -97,93 +96,91 @@ function Calendar() {
 
     return (
         <>
-            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+            <div className="border rounded-lg shadow-sm overflow-hidden">
                 <FullCalendar
                     initialView="dayGridMonth"
                     plugins={[dayGridPlugin]}
                     events={events}
                     eventClick={handleEventClick}
+                    height="auto"
                 />
+            </div>
 
-                {selectedEvent && (
-                    <DialogContent className="max-w-lg">
+            {selectedEvent && (
+                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                    <DialogContent className="max-w-md rounded-xl shadow-lg">
                         <DialogHeader>
-                            <DialogTitle className="text-2xl font-semibold">
-                                Activity Details
+                            <DialogTitle className="text-2xl font-bold text-blue-700">
+                                {selectedEvent.title}
                             </DialogTitle>
-                            <DialogDescription className="text-base">
-                                Below is the complete information about the
-                                selected activity.
+                            <DialogDescription className="text-gray-600">
+                                {selectedEvent.extendedProps?.type === "Holiday"
+                                    ? "This is a school holiday."
+                                    : "Details of the scheduled activity."}
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="mt-4 space-y-6">
-                            <div>
-                                <h3 className="text-lg font-bold text-blue-700">
-                                    {selectedEvent.title}
-                                </h3>
-                            </div>
-
-                            <hr className="border-gray-300" />
-
-                            <div className="space-y-3">
+                        <div className="mt-4 space-y-4">
+                            {selectedEvent.extendedProps?.organization && (
                                 <div>
-                                    <p className="text-sm font-medium text-gray-600">
+                                    <p className="text-sm font-medium text-gray-500">
                                         Organization
                                     </p>
-                                    <p className="text-base">
-                                        {selectedEvent.extendedProps
-                                            ?.organization || "N/A"}
+                                    <p className="text-base text-gray-800">
+                                        {
+                                            selectedEvent.extendedProps
+                                                .organization
+                                        }
                                     </p>
                                 </div>
+                            )}
 
+                            {selectedEvent.extendedProps?.venue && (
                                 <div>
-                                    <p className="text-sm font-medium text-gray-600">
+                                    <p className="text-sm font-medium text-gray-500">
                                         Venue
                                     </p>
-                                    <p className="text-base">
-                                        {selectedEvent.extendedProps?.venue ||
-                                            "N/A"}
+                                    <p className="text-base text-gray-800">
+                                        {selectedEvent.extendedProps.venue}
                                     </p>
                                 </div>
+                            )}
 
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">
-                                        Start Date & Time
-                                    </p>
-                                    <p className="text-base">
-                                        {new Date(
-                                            selectedEvent.start
-                                        ).toLocaleString()}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">
-                                        End Date & Time
-                                    </p>
-                                    <p className="text-base">
-                                        {selectedEvent.end
-                                            ? new Date(
-                                                  selectedEvent.end
-                                              ).toLocaleString()
-                                            : "N/A"}
-                                    </p>
-                                </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">
+                                    Start Date & Time
+                                </p>
+                                <p className="text-base text-gray-800">
+                                    {new Date(
+                                        selectedEvent.start
+                                    ).toLocaleString()}
+                                </p>
                             </div>
 
-                            <hr className="border-gray-300" />
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">
+                                    End Date & Time
+                                </p>
+                                <p className="text-base text-gray-800">
+                                    {selectedEvent.end
+                                        ? new Date(
+                                              selectedEvent.end
+                                          ).toLocaleString()
+                                        : "N/A"}
+                                </p>
+                            </div>
                         </div>
-                        <DialogFooter>
+
+                        <DialogFooter className="mt-6 flex justify-end">
                             <DialogClose asChild>
-                                <Button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition">
+                                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
                                     Close
                                 </Button>
                             </DialogClose>
                         </DialogFooter>
                     </DialogContent>
-                )}
-            </Dialog>
+                </Dialog>
+            )}
         </>
     );
 }

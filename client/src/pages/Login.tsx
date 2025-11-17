@@ -37,26 +37,27 @@ function Login() {
             );
         }
     };
+
     return (
-        <div className="relative flex min-h-screen overflow-hidden">
+        <div className="relative flex min-h-screen bg-gradient-to-br from-primary to-blue-900">
             <img
                 src="/logos/ua-logo.png"
                 alt="ua-logo"
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[500px] lg:top-auto lg:left-auto lg:translate-x-0 lg:translate-y-0 lg:bottom-0 lg:right-0 lg:w-[800px] lg:rotate-45 opacity-30 grayscale"
+                className="absolute opacity-10 grayscale w-[300px] md:w-[500px] lg:w-[750px] 
+                   top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             />
-            <div className="w-full lg:w-1/2 flex items-center justify-center z-50">
+
+            <div className="relative w-full flex items-center justify-center px-4 z-10">
                 <form
                     onSubmit={handleSubmit}
-                    className="border rounded-md w-full max-w-md px-4 py-8 bg-blue-800"
+                    className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6"
                 >
-                    <h1 className="text-3xl font-semibold text-center mb-4 text-white">
+                    <h1 className="text-3xl font-bold text-center text-primary">
                         Login
                     </h1>
-                    <div className="mb-4">
-                        <Label
-                            htmlFor="email"
-                            className="block mb-1 text-white"
-                        >
+
+                    <div className="space-y-1">
+                        <Label htmlFor="email" className="text-gray-700">
                             Email
                         </Label>
                         <InputGroup>
@@ -65,51 +66,47 @@ function Login() {
                                 id="email"
                                 name="email"
                                 onChange={handleChange}
-                                className="text-white"
+                                className="focus-visible:ring-primary"
                             />
                             <InputGroupAddon>
-                                <Mail className="text-white" />
+                                <Mail className="text-primary" />
                             </InputGroupAddon>
                         </InputGroup>
                     </div>
-                    <div className="mb-4">
-                        <Label
-                            htmlFor="password"
-                            className="block mb-1 text-white"
-                        >
+
+                    <div className="space-y-1">
+                        <Label htmlFor="password" className="text-gray-700">
                             Password
                         </Label>
-
-                        <InputGroup className="text-white">
+                        <InputGroup>
                             <InputGroupInput
                                 type="password"
                                 id="password"
                                 name="password"
                                 onChange={handleChange}
-                                className="text-white"
+                                className="focus-visible:ring-primary"
                             />
                             <InputGroupAddon>
-                                <Lock className="text-white" />
+                                <Lock className="text-primary" />
                             </InputGroupAddon>
                         </InputGroup>
                     </div>
-                    <Button className="mb-4 border rounded p-2 w-full bg-blue-800 text-white">
+
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-white py-2 text-lg rounded-lg">
                         Login
                     </Button>
-                    <div>
-                        <p className="text-sm text-white text-center">
-                            Don't have an account?{" "}
-                            <a
-                                href="/register"
-                                className="text-blue-200 hover:underline"
-                            >
-                                Register
-                            </a>
-                        </p>
-                    </div>
+
+                    <p className="text-center text-sm text-gray-700">
+                        Don’t have an account?{" "}
+                        <a
+                            href="/register"
+                            className="text-primary font-semibold hover:underline"
+                        >
+                            Register
+                        </a>
+                    </p>
                 </form>
             </div>
-            <div className="w-1/2 hidden lg:block"></div>
         </div>
     );
 }
