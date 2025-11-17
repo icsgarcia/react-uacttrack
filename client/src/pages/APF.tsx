@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import useAuth from "@/hooks/useAuth";
 import axiosInstance from "@/api/axios";
+import { toast } from "sonner";
 
 interface APFData {
     _id: string;
@@ -127,20 +128,24 @@ function APF() {
         try {
             await axiosInstance.patch(`/apf/reject/${params.id}`);
             queryClient.invalidateQueries({ queryKey: ["apf", params.id] });
-            alert("Activity Proposal rejected successfully.");
+            toast.success("Activity Proposal rejected successfully.");
         } catch (error) {
             console.error(error);
-            alert(`Failed to reject activity proposal: ${error}`);
+            toast.error(
+                "Failed to reject activity proposal. Please try again."
+            );
         }
     };
     const handleApprove = async () => {
         try {
             await axiosInstance.patch(`/apf/approve/${params.id}`);
             queryClient.invalidateQueries({ queryKey: ["apf", params.id] });
-            alert("Activity Proposal approved successfully.");
+            toast.success("Activity Proposal approved successfully.");
         } catch (error) {
             console.error(error);
-            alert(`Failed to approve activity proposal: ${error}`);
+            toast.error(
+                "Failed to approve activity proposal. Please try again."
+            );
         }
     };
 
@@ -372,7 +377,8 @@ function APF() {
                                                 {item.label}
                                             </td>
                                             <td className="border border-gray-300 px-4 py-3 text-center">
-                                                {data.files ? (
+                                                {data.files &&
+                                                data.files[item.url] ? (
                                                     <a
                                                         href={
                                                             data.files[item.url]
@@ -383,7 +389,7 @@ function APF() {
                                                             data.files[item.url]
                                                         }
                                                     >
-                                                        {item.key}
+                                                        {item.label} File
                                                     </a>
                                                 ) : (
                                                     <span className="text-gray-400">

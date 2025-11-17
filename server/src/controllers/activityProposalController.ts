@@ -233,30 +233,40 @@ export const getActivityProposalById = async (
                 .json({ message: "Activity Proposal not found" });
         }
 
-        const cashFormFile = await createPresignedUrlWithClient({
-            bucket: config.aws_s3_bucket,
-            key: String(activityProposal.cashForm),
-        });
+        const cashFormFile = activityProposal.cashForm
+            ? await createPresignedUrlWithClient({
+                  bucket: config.aws_s3_bucket,
+                  key: String(activityProposal.cashForm),
+              })
+            : null;
 
-        const foodFormFile = await createPresignedUrlWithClient({
-            bucket: config.aws_s3_bucket,
-            key: String(activityProposal.foodForm),
-        });
+        const foodFormFile = activityProposal.foodForm
+            ? await createPresignedUrlWithClient({
+                  bucket: config.aws_s3_bucket,
+                  key: String(activityProposal.foodForm),
+              })
+            : null;
 
-        const supplyFormFile = await createPresignedUrlWithClient({
-            bucket: config.aws_s3_bucket,
-            key: String(activityProposal.supplyForm),
-        });
+        const supplyFormFile = activityProposal.supplyForm
+            ? await createPresignedUrlWithClient({
+                  bucket: config.aws_s3_bucket,
+                  key: String(activityProposal.supplyForm),
+              })
+            : null;
 
-        const reproductionFormFile = await createPresignedUrlWithClient({
-            bucket: config.aws_s3_bucket,
-            key: String(activityProposal.reproductionForm),
-        });
+        const reproductionFormFile = activityProposal.reproductionForm
+            ? await createPresignedUrlWithClient({
+                  bucket: config.aws_s3_bucket,
+                  key: String(activityProposal.reproductionForm),
+              })
+            : null;
 
-        const otherFormFile = await createPresignedUrlWithClient({
-            bucket: config.aws_s3_bucket,
-            key: String(activityProposal.otherForm),
-        });
+        const otherFormFile = activityProposal.otherForm
+            ? await createPresignedUrlWithClient({
+                  bucket: config.aws_s3_bucket,
+                  key: String(activityProposal.otherForm),
+              })
+            : null;
 
         const apf = activityProposal.toObject() as any; // FIX THIS
 

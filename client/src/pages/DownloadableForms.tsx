@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/table";
 import UserProfile from "@/components/UserProfile";
 import Layout from "@/layouts/Layout";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const downloadableForms = [
     {
@@ -41,6 +43,20 @@ const downloadableForms = [
 ];
 
 function DownloadableForms() {
+    const handleClick = (name: string, link: string) => {
+        if (link === "#") {
+            toast.error("This form is currently unavailable.");
+            return;
+        }
+
+        toast.success(`Downloading ${name}...`);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = link;
+        downloadLink.download = "";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    };
     return (
         <Layout>
             <div className="p-4">
@@ -60,12 +76,15 @@ function DownloadableForms() {
                             <TableRow key={form.title}>
                                 <TableCell>{form.title}</TableCell>
                                 <TableCell>
-                                    <a
-                                        href={form.link}
-                                        className="underline hover:text-blue-800"
+                                    <Button
+                                        onClick={() =>
+                                            handleClick(form.title, form.link)
+                                        }
+                                        disabled={form.link === "#"}
+                                        className="bg-blue-600 hover:bg-blue-700"
                                     >
-                                        Download Form
-                                    </a>
+                                        Download {form.title}
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
