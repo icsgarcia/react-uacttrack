@@ -9,7 +9,6 @@
         // See also https://aka.ms/tsconfig/module
         "module": "commonjs", // "nodenext"
         "target": "es2016", // "esnext"
-        "types": ["node"],
         // For nodejs:
         // "lib": ["esnext"],
         // "types": ["node"],
